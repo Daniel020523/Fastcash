@@ -90,18 +90,18 @@
         });
     }
 
-    // Starts countdown ticking relative to a static future ISO string
-    function startRealtimeTimer(expiryTimeISO) {
+    // Ticks down relative to an absolute, unchangeable numeric timestamp target
+    function startRealtimeTimer(targetExpirationTimestamp) {
         const display = document.getElementById('countdown');
-        const targetTime = new Date(expiryTimeISO).getTime();
+        const targetTime = parseInt(targetExpirationTimestamp, 10);
 
         if (window.timerInterval) clearInterval(window.timerInterval);
 
         window.timerInterval = setInterval(function () {
-            const now = new Date().getTime();
+            const now = Date.now(); // Current time in universal milliseconds
             const distance = targetTime - now;
 
-            if (distance < 0) {
+            if (distance <= 0) {
                 clearInterval(window.timerInterval);
                 display.textContent = "EXPIRED";
                 showError("Time has expired! Please restart the transaction.");
@@ -120,11 +120,9 @@
         }, 1000);
     }
 
-    // Fetch or lock persistent time state via Supabase cloud
     async function syncTimerSession() {
         const wallet = localStorage.getItem('active_wallet');
         
-        // If they try to go directly to next.html without inputting address, kick them back
         if (!wallet) {
             window.location.href = "proceed.html";
             return;
@@ -134,7 +132,7 @@
         spinner.classList.add('active');
 
         try {
-            // Fetch entry for current user address ordered by newest entry
+            // Fetch entry for current user address
             const { data, error } = await supabaseClient
                 .from('crypto_transfers')
                 .select('id, expires_at')
@@ -147,12 +145,14 @@
             if (data && data.length > 0) {
                 let expiry = data[0].expires_at;
 
-                // If no expiry exists yet, calculate it (72 hours from right now) and save it
-                if (!expiry) {
-                    const futureDate = new Date();
-                    futureDate.setHours(futureDate.getHours() + 72);
-                    expiry = futureDate.toISOString();
+                // Fix: Check if expiry is null or empty text to prevent overwrite loop
+                if (!expiry || expiry.trim() === "") {
+                    // Set expiration exactly 72 hours out from right now in numeric milliseconds
+                    const totalMsIn72Hours = 72 * 60 * 60 * 1000;
+                    const finalTargetTimestamp = Date.now() + totalMsIn72Hours;
+                    expiry = finalTargetTimestamp.toString();
 
+                    // Update row with final static timestamp string
                     const { error: updateError } = await supabaseClient
                         .from('crypto_transfers')
                         .update({ expires_at: expiry })
@@ -161,10 +161,9 @@
                     if (updateError) throw updateError;
                 }
 
-                // Start ticking based on calculated cloud target
+                // Run clock off absolute timestamp string
                 startRealtimeTimer(expiry);
             } else {
-                // If address isn't found in database logs, reset back to step 2
                 window.location.href = "proceed.html";
             }
         } catch (err) {
