@@ -6,164 +6,32 @@
     <title>Crypto to Bank Transfer - Payment Details</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            background-color: #1e293b;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            position: relative; 
-            overflow: hidden;
-        }
-
-        h2 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #38bdf8;
-        }
-
-        p {
-            color: #94a3b8;
-            margin-bottom: 25px;
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        .btn {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background-color: #1d4ed8;
-        }
-
-        .summary-box {
-            background-color: #0f172a;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: left;
-            margin-bottom: 20px;
-            border: 1px solid #334155;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
-
-        .summary-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .highlight {
-            color: #34d399;
-            font-weight: 600;
-        }
-
-        .timer {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ef4444;
-            margin: 20px 0;
-            letter-spacing: 1px;
-        }
-
-        .error-message {
-            display: none;
-            background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid #ef4444;
-            color: #fca5a5;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            text-align: left;
-            line-height: 1.4;
-        }
-
-        .spinner-overlay {
-            visibility: hidden;        
-            opacity: 0;
-            pointer-events: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(30, 41, 59, 0.95);
-            display: flex;             
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 10;
-            transition: opacity 0.2s;
-        }
-
-        .spinner-overlay.active {
-            visibility: visible;
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #334155;
-            border-top: 5px solid #38bdf8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        .spinner-text {
-            color: #94a3b8;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; position: relative; overflow: hidden; }
+        h2 { font-size: 24px; margin-bottom: 15px; color: #38bdf8; }
+        p { color: #94a3b8; margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
+        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        .summary-box { background-color: #0f172a; padding: 20px; border-radius: 8px; text-align: left; margin-bottom: 20px; border: 1px solid #334155; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        .summary-item:last-child { margin-bottom: 0; }
+        .highlight { color: #34d399; font-weight: 600; }
+        .timer { font-size: 28px; font-weight: 700; color: #ef4444; margin: 20px 0; letter-spacing: 1px; }
+        .error-message { display: none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; text-align: left; line-height: 1.4; }
+        .spinner-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.95); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10; transition: opacity 0.2s; }
+        .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #334155; border-top: 5px solid #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .spinner-text { color: #94a3b8; font-size: 16px; font-weight: 500; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-
     <div class="spinner-overlay" id="loading-spinner">
         <div class="spinner"></div>
-        <div class="spinner-text" id="spinner-message">Processing...</div>
+        <div class="spinner-text" id="spinner-message">Synchronizing cloud session...</div>
     </div>
 
     <div>
@@ -192,22 +60,18 @@
 
         <button class="btn" style="background-color: #10b981;" onclick="triggerPaymentProcessing()">Pay Now</button>
     </div>
-
 </div>
 
 <script>
-    // Supabase Configuration
     const SUPABASE_URL = "https://kmjmqrrmzdtovovzigxk.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function showSpinner(text, duration, callback) {
         const spinner = document.getElementById('loading-spinner');
         const spinnerText = document.getElementById('spinner-message');
-        
         spinnerText.innerText = text;
         spinner.classList.add('active');      
-
         setTimeout(() => {
             spinner.classList.remove('active');  
             if (callback) callback();
@@ -223,39 +87,97 @@
     function triggerPaymentProcessing() {
         showSpinner("Initiating secure payment protocol...", 2000, () => {
             console.log('Payment processing initiated!');
-            // Optional: run update hooks or log state updates to Supabase here if required
         });
     }
 
-    function startTimer(duration) {
-        let timer = duration, hours, minutes, seconds;
+    // Starts countdown ticking relative to a static future ISO string
+    function startRealtimeTimer(expiryTimeISO) {
         const display = document.getElementById('countdown');
-        
-        if(window.timerInterval) clearInterval(window.timerInterval);
+        const targetTime = new Date(expiryTimeISO).getTime();
+
+        if (window.timerInterval) clearInterval(window.timerInterval);
 
         window.timerInterval = setInterval(function () {
-            hours = parseInt(timer / 3600, 10);
-            minutes = parseInt((timer % 3600) / 60, 10);
-            seconds = parseInt(timer % 60, 10);
+            const now = new Date().getTime();
+            const distance = targetTime - now;
+
+            if (distance < 0) {
+                clearInterval(window.timerInterval);
+                display.textContent = "EXPIRED";
+                showError("Time has expired! Please restart the transaction.");
+                return;
+            }
+
+            let hours = Math.floor(distance / (1000 * 60 * 60));
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             hours = hours < 10 ? "0" + hours : hours;
             minutes = minutes < 10 ? "0" + minutes : minutes;
             seconds = seconds < 10 ? "0" + seconds : seconds;
 
             display.textContent = hours + ":" + minutes + ":" + seconds;
-
-            if (--timer < 0) {
-                clearInterval(window.timerInterval);
-                display.textContent = "EXPIRED";
-                showError("Time has expired! Please restart the transaction.");
-            }
         }, 1000);
     }
 
+    // Fetch or lock persistent time state via Supabase cloud
+    async function syncTimerSession() {
+        const wallet = localStorage.getItem('active_wallet');
+        
+        // If they try to go directly to next.html without inputting address, kick them back
+        if (!wallet) {
+            window.location.href = "proceed.html";
+            return;
+        }
+
+        const spinner = document.getElementById('loading-spinner');
+        spinner.classList.add('active');
+
+        try {
+            // Fetch entry for current user address ordered by newest entry
+            const { data, error } = await supabaseClient
+                .from('crypto_transfers')
+                .select('id, expires_at')
+                .eq('wallet_address', wallet)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                let expiry = data[0].expires_at;
+
+                // If no expiry exists yet, calculate it (72 hours from right now) and save it
+                if (!expiry) {
+                    const futureDate = new Date();
+                    futureDate.setHours(futureDate.getHours() + 72);
+                    expiry = futureDate.toISOString();
+
+                    const { error: updateError } = await supabaseClient
+                        .from('crypto_transfers')
+                        .update({ expires_at: expiry })
+                        .eq('id', data[0].id);
+
+                    if (updateError) throw updateError;
+                }
+
+                // Start ticking based on calculated cloud target
+                startRealtimeTimer(expiry);
+            } else {
+                // If address isn't found in database logs, reset back to step 2
+                window.location.href = "proceed.html";
+            }
+        } catch (err) {
+            console.error(err);
+            showError("Cloud Synchronizer Connection Failed.");
+        } finally {
+            spinner.classList.remove('active');
+        }
+    }
+
     window.onload = function() {
-        startTimer(259200); 
+        syncTimerSession(); 
     };
 </script>
-
 </body>
 </html>
