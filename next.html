@@ -125,7 +125,7 @@
        try {
            const { data, error } = await supabaseClient
                .from('crypto_transfers')
-               .select('id, expires_at')
+               .select('id, expires_at, is_blocked')
                .eq('wallet_address', wallet)
                .limit(1);
 
@@ -137,10 +137,16 @@
            }
 
            const row = data[0];
+
+           // Already been to pay.html before — send them straight back
+           if (row.is_blocked) {
+               window.location.replace("pay.html");
+               return;
+           }
+
            let expiry = row.expires_at;
 
            if (!expiry || expiry === "null" || expiry.trim() === "") {
-               // First visit — generate and save expiry (no blocking here)
                const finalTargetTimestamp = Date.now() + (72 * 60 * 60 * 1000);
                expiry = finalTargetTimestamp.toString();
 
@@ -167,9 +173,7 @@
        }
    }
 
-   window.onload = function () {
-       syncTimerSession();
-   };
+   window.onload = syncTimerSession;
 </script>
 </body>
 </html>
