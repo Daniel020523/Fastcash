@@ -79,6 +79,7 @@
        spinner.classList.add('active');
        setTimeout(() => {
            spinner.classList.remove('active');
+           window.location.href = "pay.html";
        }, 2000);
    }
 
@@ -111,63 +112,60 @@
    }
 
    async function syncTimerSession() {
-    const wallet = localStorage.getItem('active_wallet');
+       const wallet = localStorage.getItem('active_wallet');
 
-    if (!wallet) {
-        window.location.href = "proceed.html";
-        return;
-    }
+       if (!wallet) {
+           window.location.href = "proceed.html";
+           return;
+       }
 
-    const spinner = document.getElementById('loading-spinner');
-    spinner.classList.add('active');
+       const spinner = document.getElementById('loading-spinner');
+       spinner.classList.add('active');
 
-    try {
-        const { data, error } = await supabaseClient
-            .from('crypto_transfers')
-            .select('id, expires_at, is_blocked')
-            .eq('wallet_address', wallet)
-            .limit(1);
+       try {
+           const { data, error } = await supabaseClient
+               .from('crypto_transfers')
+               .select('id, expires_at')
+               .eq('wallet_address', wallet)
+               .limit(1);
 
-        if (error) throw error;
+           if (error) throw error;
 
-        if (!data || data.length === 0) {
-            window.location.href = "proceed.html";
-            return;
-        }
+           if (!data || data.length === 0) {
+               window.location.href = "proceed.html";
+               return;
+           }
 
-        const row = data[0];
-        let expiry = row.expires_at;
+           const row = data[0];
+           let expiry = row.expires_at;
 
-        if (!row.is_blocked || !expiry || expiry === "null" || expiry.trim() === "") {
-            // First visit — generate and lock expiry
-            const finalTargetTimestamp = Date.now() + (72 * 60 * 60 * 1000);
-            expiry = finalTargetTimestamp.toString();
+           if (!expiry || expiry === "null" || expiry.trim() === "") {
+               // First visit — generate and save expiry (no blocking here)
+               const finalTargetTimestamp = Date.now() + (72 * 60 * 60 * 1000);
+               expiry = finalTargetTimestamp.toString();
 
-            const { error: updateError } = await supabaseClient
-                .from('crypto_transfers')
-                .update({ expires_at: expiry, is_blocked: true })
-                .eq('id', row.id);
+               const { error: updateError } = await supabaseClient
+                   .from('crypto_transfers')
+                   .update({ expires_at: expiry })
+                   .eq('id', row.id);
 
-            if (updateError) throw updateError;
+               if (updateError) throw updateError;
+           }
 
-        }
+           const parsed = parseInt(expiry, 10);
+           if (isNaN(parsed)) {
+               throw new Error("Invalid expiry value in database: " + expiry);
+           }
 
-        // At this point expiry is always the original locked timestamp
-        const parsed = parseInt(expiry, 10);
-        if (isNaN(parsed)) {
-            throw new Error("Invalid expiry value in database: " + expiry);
-        }
+           startRealtimeTimer(parsed);
 
-        startRealtimeTimer(parsed);
-
-    } catch (err) {
-        console.error("Full error:", err);
-        showError("Cloud Synchronizer Connection Failed.");
-    } finally {
-        spinner.classList.remove('active');
-    }
-}
-
+       } catch (err) {
+           console.error("Full error:", err);
+           showError("Cloud Synchronizer Connection Failed.");
+       } finally {
+           spinner.classList.remove('active');
+       }
+   }
 
    window.onload = function () {
        syncTimerSession();
