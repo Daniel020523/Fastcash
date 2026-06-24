@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+
+        .container {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h2 { font-size: 24px; margin-bottom: 10px; color: #38bdf8; }
+        .subtitle { color: #94a3b8; margin-bottom: 25px; font-size: 15px; line-height: 1.5; }
+
+        /* Tabs */
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        .tab-btn {
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .tab-btn.active-crypto { background-color: #0f172a; color: #38bdf8; }
+        .tab-btn.active-voucher { background-color: #0f172a; color: #f59e0b; }
+        .tab-btn:not(.active-crypto):not(.active-voucher):hover { background-color: rgba(255,255,255,0.04); }
+
+        /* Panels */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Labels */
+        label { display: block; text-align: left; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
+
+        /* Address box */
+        .address-wrap {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            margin-bottom: 20px;
+        }
+        .address-input {
+            flex: 1;
+            padding: 14px;
+            background-color: #0f172a;
+            border: 2px solid #334155;
+            color: #f8fafc;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            word-break: break-all;
+            cursor: default;
+        }
+        .address-input:focus { border-color: #38bdf8; }
+
+        .copy-btn {
+            padding: 14px 16px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover { background-color: #1d4ed8; }
+        .copy-btn.copied { background-color: #16a34a; }
+
+        /* Network badge */
+        .network-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56,189,248,0.1);
+            border: 1px solid #38bdf8;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #38bdf8;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+        }
+        .network-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #38bdf8;
+            animation: blink 1.8s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* Note box */
+        .note-box {
+            background-color: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #d97706;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .note-box strong { color: #f59e0b; }
+
+        /* Main button */
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn.amber { background-color: #d97706; }
+        .btn.amber:hover { background-color: #b45309; }
+
+        /* Upload zone */
+        .upload-zone {
+            border: 2px dashed #334155;
+            border-radius: 10px;
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #0f172a;
+            margin-bottom: 16px;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #f59e0b;
+            background: rgba(245,158,11,0.05);
+        }
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .upload-icon { font-size: 30px; margin-bottom: 10px; }
+        .upload-zone h3 { font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
+        .upload-zone p { font-size: 12px; color: #64748b; }
+
+        /* Preview */
+        .preview-wrap {
+            display: none;
+            margin-bottom: 16px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            position: relative;
+        }
+        .preview-wrap img { width: 100%; max-height: 220px; object-fit: cover; display: block; }
+        .remove-img {
+            position: absolute;
+            top: 8px; right: 8px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            border-radius: 50%;
+            width: 28px; height: 28px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Error / status */
+        .error-message {
+            display: none;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: left;
+            line-height: 1.4;
+        }
+        .success-message {
+            display: none;
+            background-color: rgba(22, 163, 74, 0.1);
+            border: 1px solid #16a34a;
+            color: #86efac;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        /* Spinner overlay */
+        .spinner-overlay {
+            visibility: hidden; opacity: 0; pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(30, 41, 59, 0.95);
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 10; transition: opacity 0.2s;
+        }
+        .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid #334155;
+            border-top: 5px solid #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        .spinner-text { color: #94a3b8; font-size: 16px; font-weight: 500; }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="spinner-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+        <div class="spinner-text" id="spinner-message">Processing...</div>
+    </div>
+
+    <h2>Choose Payment Method</h2>
+    <p class="subtitle">Select how you'd like to complete your payment.</p>
+
+    <div class="tabs">
+        <button class="tab-btn active-crypto" id="tab-crypto" onclick="switchTab('crypto')">💎 TRC20 / USDT</button>
+        <button class="tab-btn" id="tab-voucher" onclick="switchTab('voucher')">🎟️ Voucher</button>
+    </div>
+
+    <!-- TRC20 Panel -->
+    <div class="panel active" id="panel-crypto">
+        <div class="network-badge">TRON Network · TRC20</div>
+
+        <label>USDT (TRC20) Wallet Address</label>
+        <div class="address-wrap">
+            <input class="address-input" id="trc20-display" value="TKSRz4KXL5SWbV5yH8627172B97BuKiffw" readonly>
+            <button class="copy-btn" id="copy-btn" onclick="copyAddress()">Copy</button>
+        </div>
+
+        <div class="note-box">
+            <strong>⚠️ Important:</strong> Only send <strong>USDT</strong> on the <strong>TRON (TRC20)</strong> network to this address. Sending any other asset or using a different network will result in <strong>permanent loss of funds</strong>.
+        </div>
+
+        <button class="btn" onclick="confirmCrypto()">I've Sent the Payment</button>
+
+        <div class="success-message" id="crypto-success"></div>
+        <div class="error-message" id="crypto-error"></div>
+    </div>
+
+    <!-- Voucher Panel -->
+    <div class="panel" id="panel-voucher">
+        <p class="subtitle" style="margin-bottom:20px;">Upload a clear photo of your voucher. We'll verify it and activate your account within minutes.</p>
+
+        <div class="upload-zone" id="upload-zone"
+             ondragover="handleDrag(event,true)"
+             ondragleave="handleDrag(event,false)"
+             ondrop="handleDrop(event)">
+            <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])">
+            <div class="upload-icon">📎</div>
+            <h3>Tap to upload voucher photo</h3>
+            <p>JPG, PNG or WEBP · Max 5MB</p>
+        </div>
+
+        <div class="preview-wrap" id="preview-wrap">
+            <img id="preview-img" src="" alt="Voucher preview">
+            <button class="remove-img" onclick="removeImage()">✕</button>
+        </div>
+
+        <div class="error-message" id="voucher-error"></div>
+        <div class="success-message" id="voucher-success"></div>
+
+        <button class="btn amber" id="voucher-btn" disabled onclick="uploadVoucher()">Proceed</button>
+    </div>
+</div>
+
+<script>
+    // ── CONFIG ────────────────────────────────────────────────────────────────
+    const SUPABASE_URL  = 'https://kmjmqrrmzdtovovzigxk.supabase.co'; // ← replace
+    const SUPABASE_ANON = 'sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb';                         // ← replace
+    const BUCKET        = 'vouchers';
+    const TRC20_ADDRESS = 'TKSRz4KXL5SWbV5yH8627172B97BuKiffw';
+    // ─────────────────────────────────────────────────────────────────────────
+
+    let selectedFile = null;
+
+    function switchTab(tab) {
+        document.getElementById('tab-crypto').className  = 'tab-btn';
+        document.getElementById('tab-voucher').className = 'tab-btn';
+        document.getElementById('panel-crypto').classList.remove('active');
+        document.getElementById('panel-voucher').classList.remove('active');
+
+        if (tab === 'crypto') {
+            document.getElementById('tab-crypto').classList.add('active-crypto');
+            document.getElementById('panel-crypto').classList.add('active');
+        } else {
+            document.getElementById('tab-voucher').classList.add('active-voucher');
+            document.getElementById('panel-voucher').classList.add('active');
+        }
+    }
+
+    function copyAddress() {
+        navigator.clipboard.writeText(TRC20_ADDRESS).then(() => {
+            const btn = document.getElementById('copy-btn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    }
+
+    function confirmCrypto() {
+        document.getElementById('crypto-error').style.display = 'none';
+        const s = document.getElementById('crypto-success');
+        s.textContent = "✅ Noted! We'll confirm your transaction on-chain shortly.";
+        s.style.display = 'block';
+    }
+
+    // Drag & drop
+    function handleDrag(e, over) {
+        e.preventDefault();
+        document.getElementById('upload-zone').classList.toggle('dragover', over);
+    }
+    function handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('upload-zone').classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    }
+
+    function handleFile(file) {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showMsg('voucher-error', 'Please upload an image file (JPG, PNG, WEBP).');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            showMsg('voucher-error', 'File too large. Maximum size is 5MB.');
+            return;
+        }
+        selectedFile = file;
+        hideMsg('voucher-error');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('preview-img').src = e.target.result;
+            document.getElementById('preview-wrap').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        document.getElementById('voucher-btn').disabled = false;
+    }
+
+    function removeImage() {
+        selectedFile = null;
+        document.getElementById('file-input').value = '';
+        document.getElementById('preview-wrap').style.display = 'none';
+        document.getElementById('preview-img').src = '';
+        document.getElementById('voucher-btn').disabled = true;
+        hideMsg('voucher-error');
+        hideMsg('voucher-success');
+    }
+
+    async function uploadVoucher() {
+        if (!selectedFile) return;
+
+        const btn = document.getElementById('voucher-btn');
+        btn.disabled = true;
+
+        const spinner = document.getElementById('loading-spinner');
+        document.getElementById('spinner-message').innerText = 'Uploading voucher...';
+        spinner.classList.add('active');
+
+        hideMsg('voucher-error');
+        hideMsg('voucher-success');
+
+        try {
+            const ext      = selectedFile.name.split('.').pop();
+            const fileName = `voucher_${Date.now()}.${ext}`;
+            const filePath = `uploads/${fileName}`;
+
+            const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_ANON}`,
+                    'Content-Type': selectedFile.type,
+                    'x-upsert': 'false',
+                },
+                body: selectedFile,
+            });
+
+            spinner.classList.remove('active');
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `Upload failed (${res.status})`);
+            }
+
+            showMsg('voucher-success', "✅ Voucher uploaded successfully! We'll review and activate your account shortly.");
+            btn.textContent = 'Submitted ✓';
+
+        } catch (err) {
+            spinner.classList.remove('active');
+            showMsg('voucher-error', `Upload failed: ${err.message}`);
+            btn.disabled = false;
+        }
+    }
+
+    function showMsg(id, text) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.style.display = 'block';
+    }
+    function hideMsg(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+</script>
+</body>
+</html>
