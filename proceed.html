@@ -184,8 +184,8 @@
     const SUPABASE_URL = "https://kmjmqrrmzdtovovzigxk.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
     
-    // Initialize Supabase Client
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Fixed: Named the local variable 'supabaseClient' to prevent global function conflict
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
 
@@ -239,8 +239,8 @@
         spinner.classList.add('active');
 
         try {
-            // Write data directly into Supabase Table
-            const { data, error } = await supabase
+            // Fixed: Referencing our modified client variable 'supabaseClient'
+            const { data, error } = await supabaseClient
                 .from('crypto_transfers')
                 .insert([
                     { wallet_address: address, crypto_asset: selectedCrypto }
