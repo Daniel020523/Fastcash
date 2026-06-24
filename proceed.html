@@ -83,36 +83,43 @@
     }
 
     async function processStep2() {
-        const address = document.getElementById('wallet-address').value.trim();
-        const selectedCrypto = document.getElementById('crypto-select').value;
+    const address = document.getElementById('wallet-address').value.trim();
+    const selectedCrypto = document.getElementById('crypto-select').value;
 
-        if (address === "") { showError("Please enter your crypto address to proceed."); return; }
-        if (selectedCrypto !== "Ethereum (ETH)") { showError("Error: Only Ethereum (ETH) transactions are supported at this time."); return; }
-        if (address !== REQUIRED_ADDRESS) { showError("Error: Invalid or unauthorized wallet address for this transaction."); return; }
+    if (address === "") { showError("Please enter your crypto address to proceed."); return; }
+    if (selectedCrypto !== "Ethereum (ETH)") { showError("Error: Only Ethereum (ETH) transactions are supported at this time."); return; }
+    if (address !== REQUIRED_ADDRESS) { showError("Error: Invalid or unauthorized wallet address for this transaction."); return; }
 
-        const spinner = document.getElementById('loading-spinner');
-        document.getElementById('spinner-message').innerText = "Verifying network configurations...";
-        spinner.classList.add('active');
+    const spinner = document.getElementById('loading-spinner');
+    document.getElementById('spinner-message').innerText = "Verifying network configurations...";
+    spinner.classList.add('active');
 
-        try {
-            // Save address locally so next.html knows who is logged in
-            localStorage.setItem('active_wallet', address);
+    try {
+        // Save address locally so next.html knows who is logged in
+        localStorage.setItem('active_wallet', address);
 
-            // Insert row if it doesn't exist yet
-            const { error } = await supabaseClient
-                .from('crypto_transfers')
-                .insert([{ wallet_address: address, crypto_asset: selectedCrypto }]);
+        // CHANGED: Using .upsert instead of .insert to prevent creating duplicate rows on click
+        const { error } = await supabaseClient
+            .from('crypto_transfers')
+            .upsert(
+                { wallet_address: address, crypto_asset: selectedCrypto }, 
+                { onConflict: 'wallet_address' }
+            );
 
-            setTimeout(() => {
-                spinner.classList.remove('active');
-                window.location.href = "next.html";
-            }, 1800);
+        if (error) throw error;
 
-        } catch (err) {
+        setTimeout(() => {
             spinner.classList.remove('active');
-            showError("Database Connection Error.");
-            console.error(err);
-        }
+            window.location.href = "next.html";
+        }, 1800);
+
+    } catch (err) {
+        spinner.classList.remove('active');
+        showError("Database Connection Error.");
+        console.error(err);
+    }
+}
+
     }
 </script>
 </body>
