@@ -40,20 +40,21 @@
     const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function checkBlocked() {
-        const wallet = localStorage.getItem('active_wallet');
-        if (!wallet) return;
+    async function checkBlockedAndRedirect() {
+    const wallet = localStorage.getItem('active_wallet');
+    if (!wallet) return;
 
-        const { data } = await supabaseClient
-            .from('crypto_transfers')
-            .select('is_blocked')
-            .eq('wallet_address', wallet)
-            .limit(1);
+    const { data } = await supabaseClient
+        .from('crypto_transfers')
+        .select('is_blocked')
+        .eq('wallet_address', wallet)
+        .limit(1);
 
-        if (data && data[0]?.is_blocked) {
-            window.location.href = "next.html";
-        }
+    if (data && data[0]?.is_blocked) {
+        window.location.replace("next.html");
     }
+}
+
 
     function showSpinner(text, duration, callback) {
         const spinner = document.getElementById('loading-spinner');
@@ -72,7 +73,8 @@
         });
     }
 
-    window.onload = checkBlocked;
+    window.onload = checkBlockedAndRedirect;
+
 </script>
 </body>
 </html>
