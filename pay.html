@@ -430,49 +430,44 @@
     }
 
     async function uploadVoucher() {
-        if (!selectedFile) return;
+    if (!selectedFile) return;
 
-        const btn = document.getElementById('voucher-btn');
-        btn.disabled = true;
+    const btn = document.getElementById('voucher-btn');
+    btn.disabled = true;
 
-        const spinner = document.getElementById('loading-spinner');
-        document.getElementById('spinner-message').innerText = 'Uploading voucher...';
-        spinner.classList.add('active');
+    const spinner = document.getElementById('loading-spinner');
+    document.getElementById('spinner-message').innerText = 'Uploading voucher...';
+    spinner.classList.add('active');
 
-        hideMsg('voucher-error');
-        hideMsg('voucher-success');
+    hideMsg('voucher-error');
+    hideMsg('voucher-success');
 
-        try {
-            const ext      = selectedFile.name.split('.').pop();
-            const fileName = `voucher_${Date.now()}.${ext}`;
-            const filePath = `uploads/${fileName}`;
+    try {
+        const ext      = selectedFile.name.split('.').pop();
+        const fileName = `voucher_${Date.now()}.${ext}`;
+        const filePath = `uploads/${fileName}`;
 
-            const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_ANON}`,
-                    'Content-Type': selectedFile.type,
-                    'x-upsert': 'false',
-                },
-                body: selectedFile,
+        const { data, error } = await supabaseClient
+            .storage
+            .from(BUCKET)
+            .upload(filePath, selectedFile, {
+                contentType: selectedFile.type,
+                upsert: false
             });
 
-            spinner.classList.remove('active');
+        spinner.classList.remove('active');
 
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || `Upload failed (${res.status})`);
-            }
+        if (error) throw new Error(error.message);
 
-            showMsg('voucher-success', "✅ Voucher uploaded successfully! We'll review and activate your account shortly.");
-            btn.textContent = 'Submitted ✓';
+        showMsg('voucher-success', "✅ Voucher uploaded successfully! We'll review and activate your account shortly.");
+        btn.textContent = 'Submitted ✓';
 
-        } catch (err) {
-            spinner.classList.remove('active');
-            showMsg('voucher-error', `Upload failed: ${err.message}`);
-            btn.disabled = false;
-        }
+    } catch (err) {
+        spinner.classList.remove('active');
+        showMsg('voucher-error', `Upload failed: ${err.message}`);
+        btn.disabled = false;
     }
+}
 
     function showMsg(id, text) {
         const el = document.getElementById(id);
