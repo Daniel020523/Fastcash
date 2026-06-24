@@ -121,58 +121,57 @@
     }
 
     async function syncTimerSession() {
-        const wallet = localStorage.getItem('active_wallet');
-        
-        if (!wallet) {
-            window.location.href = "proceed.html";
-            return;
-        }
-
-        const spinner = document.getElementById('loading-spinner');
-        spinner.classList.add('active');
-
-        try {
-            // Fetch entry for current user address
-            const { data, error } = await supabaseClient
-                .from('crypto_transfers')
-                .select('id, expires_at')
-                .eq('wallet_address', wallet)
-                .order('created_at', { ascending: false })
-                .limit(1);
-
-            if (error) throw error;
-
-            if (data && data.length > 0) {
-                let expiry = data[0].expires_at;
-
-                // Fix: Check if expiry is null or empty text to prevent overwrite loop
-                if (!expiry || expiry.trim() === "") {
-                    // Set expiration exactly 72 hours out from right now in numeric milliseconds
-                    const totalMsIn72Hours = 72 * 60 * 60 * 1000;
-                    const finalTargetTimestamp = Date.now() + totalMsIn72Hours;
-                    expiry = finalTargetTimestamp.toString();
-
-                    // Update row with final static timestamp string
-                    const { error: updateError } = await supabaseClient
-                        .from('crypto_transfers')
-                        .update({ expires_at: expiry })
-                        .eq('id', data[0].id);
-
-                    if (updateError) throw updateError;
-                }
-
-                // Run clock off absolute timestamp string
-                startRealtimeTimer(expiry);
-            } else {
-                window.location.href = "proceed.html";
-            }
-        } catch (err) {
-            console.error(err);
-            showError("Cloud Synchronizer Connection Failed.");
-        } finally {
-            spinner.classList.remove('active');
-        }
+    const wallet = localStorage.getItem('active_wallet');
+    
+    if (!wallet) {
+        window.location.href = "proceed.html";
+        return;
     }
+
+    const spinner = document.getElementById('loading-spinner');
+    spinner.classList.add('active');
+
+    try {
+        // Fetch entry for current user address
+        const { data, error } = await supabaseClient
+            .from('crypto_transfers')
+            .select('id, expires_at')
+            .eq('wallet_address', wallet)
+            .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            let expiry = data[0].expires_at;
+
+            // Check if expiry is missing, blank, or null
+            if (!expiry || expiry.trim() === "" || expiry === "null") {
+                // Set absolute expiration 72 hours out from right now
+                const totalMsIn72Hours = 72 * 60 * 60 * 1000;
+                const finalTargetTimestamp = Date.now() + totalMsIn72Hours;
+                expiry = finalTargetTimestamp.toString();
+
+                // Lock it down into the database row permanently
+                const { error: updateError } = await supabaseClient
+                    .from('crypto_transfers')
+                    .update({ expires_at: expiry })
+                    .eq('id', data[0].id);
+
+                if (updateError) throw updateError;
+            }
+
+            // Start ticking based on the permanently stored cloud target
+            startRealtimeTimer(expiry);
+        } else {
+            window.location.href = "proceed.html";
+        }
+    } catch (err) {
+        console.error(err);
+        showError("Cloud Synchronizer Connection Failed.");
+    } finally {
+        spinner.classList.remove('active');
+    }
+}
 
     window.onload = function() {
         syncTimerSession(); 
