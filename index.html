@@ -11,16 +11,16 @@
         .container { background-color: #1e293b; padding: 36px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
 
         /* Icon */
-        .icon-wrap { width: 86px; height: 86px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: pulse 2.4s ease-in-out infinite; }
+        .icon-wrap { width: 86px; height: 86px; border-radius: 50%; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: pulse 2.4s ease-in-out infinite; }
         .icon-wrap svg { width: 40px; height: 40px; }
-        @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(245,158,11,0.25); } 50%{ box-shadow: 0 0 0 14px rgba(245,158,11,0); } }
+        @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(74,222,128,0.25); } 50%{ box-shadow: 0 0 0 14px rgba(74,222,128,0); } }
 
         h2 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
         .subtitle { color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
 
         /* Status badge */
-        .status-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: #f59e0b; letter-spacing: 0.06em; margin-bottom: 28px; }
-        .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; animation: blink 1.8s infinite; }
+        .status-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.4); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: #4ade80; letter-spacing: 0.06em; margin-bottom: 28px; }
+        .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: blink 1.8s infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         /* Info card */
@@ -61,21 +61,21 @@
 <div class="container">
 
     <div class="icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
+            <polyline points="9 12 11.5 14.5 16 10"/>
         </svg>
     </div>
 
-    <h2>Transaction Pending</h2>
-    <p class="subtitle">Your payment has been received and is currently being reviewed. Please allow some time for processing.</p>
+    <h2>Transaction Completed ✓</h2>
+    <p class="subtitle">Your payment has been received and successfully processed. Everything is in order.</p>
 
-    <div class="status-badge">PROCESSING</div>
+    <div class="status-badge">COMPLETED</div>
 
     <div class="info-card">
         <div class="info-row">
             <span class="info-label">Status</span>
-            <span class="info-value amber">Under Review</span>
+            <span class="info-value green">Successful</span>
         </div>
         <div class="info-row">
             <span class="info-label">Estimated Time</span>
@@ -107,7 +107,7 @@
 
         <div class="step">
             <div class="step-dot-wrap">
-                <div class="step-dot active">⋯</div>
+                <div class="step-dot done">✓</div>
                 <div class="step-line"></div>
             </div>
             <div class="step-content">
@@ -118,17 +118,13 @@
 
         <div class="step">
             <div class="step-dot-wrap">
-                <div class="step-dot pending">3</div>
+                <div class="step-dot done">✓</div>
             </div>
             <div class="step-content">
                 <div class="step-name">Account Activated</div>
                 <div class="step-desc">Your account will be fully activated once verification is complete.</div>
             </div>
         </div>
-    </div>
-
-    <div class="note-box">
-        <strong>ℹ️ What's next?</strong> You'll be notified once your transaction is confirmed. If you don't hear back within <strong>3 business days</strong>, please contact our support team with your Reference ID.
     </div>
 
     <button class="btn" onclick="window.location.href='withdraw.html'">Proceed →</button>
