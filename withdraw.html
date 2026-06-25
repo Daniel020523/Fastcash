@@ -253,7 +253,11 @@
 
         document.getElementById('form-error').style.display = 'none';
 
-        window.location.href = 'main.html';
+        const btn = document.getElementById('continue-btn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        document.getElementById('loading-spinner').classList.add('active');
+        setTimeout(() => { window.location.href = 'main.html'; }, 1500);
     }
 </script>
 </body>
