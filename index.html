@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Withdrawal Under Review</title>
+    <title>Withdrawal Approved</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -11,15 +11,15 @@
 
         /* Header */
         .header { text-align: center; margin-bottom: 28px; }
-        .icon-wrap { width: 70px; height: 70px; border-radius: 50%; background: rgba(251,191,36,0.1); border: 2px solid rgba(251,191,36,0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: pulse 2.4s ease-in-out infinite; }
+        .icon-wrap { width: 70px; height: 70px; border-radius: 50%; background: rgba(74,222,128,0.1); border: 2px solid rgba(74,222,128,0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: pulse 2.4s ease-in-out infinite; }
         .icon-wrap svg { width: 32px; height: 32px; }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.25)} 50%{box-shadow:0 0 0 12px rgba(251,191,36,0)} }
-        .header h2 { font-size: 22px; font-weight: 700; color: #fbbf24; margin-bottom: 6px; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0.25)} 50%{box-shadow:0 0 0 12px rgba(74,222,128,0)} }
+        .header h2 { font-size: 22px; font-weight: 700; color: #4ade80; margin-bottom: 6px; }
         .header p { color: #94a3b8; font-size: 14px; line-height: 1.5; }
 
         /* Status badge */
-        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 20px; padding: 5px 13px; font-size: 12px; font-weight: 700; color: #fbbf24; margin-bottom: 24px; }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #fbbf24; animation: blink 1.8s infinite; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 20px; padding: 5px 13px; font-size: 12px; font-weight: 700; color: #4ade80; margin-bottom: 24px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: blink 1.8s infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         /* Payment summary card */
@@ -34,22 +34,15 @@
         /* Divider */
         .divider { border: none; border-top: 1px solid #334155; margin: 22px 0; }
 
-        /* Review steps */
+        /* Steps */
         .steps-title { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
         .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
         .step:last-child { margin-bottom: 0; }
         .step-icon { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .step-icon.done { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); }
-        .step-icon.active { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); }
-        .step-icon.pending { background: rgba(100,116,139,0.1); border: 1px solid rgba(100,116,139,0.2); }
         .step-body { padding-top: 5px; }
         .step-name { font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 3px; }
-        .step-name.muted { color: #475569; }
         .step-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
-
-        /* Note box */
-        .note-box { background-color: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #7dd3fc; line-height: 1.6; margin-top: 22px; }
-        .note-box strong { color: #38bdf8; }
     </style>
 </head>
 <body>
@@ -57,17 +50,16 @@
 
     <div class="header">
         <div class="icon-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                <polyline points="7 12.5 10.5 16 17 9"/>
             </svg>
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:12px;">
-            <div class="status-badge"><div class="status-dot"></div> Under Review</div>
+            <div class="status-badge"><div class="status-dot"></div> Approved</div>
         </div>
-        <h2>Withdrawal Under Review</h2>
-        <p>Your withdrawal has been received and is currently being reviewed by our team.</p>
+        <h2>🎉 Withdrawal Approved!</h2>
+        <p>Great news! Your withdrawal has been reviewed and successfully approved by our team.</p>
     </div>
 
     <!-- Payment Summary -->
@@ -82,13 +74,13 @@
         </div>
         <div class="summary-row">
             <div class="summary-label">Status</div>
-            <div class="summary-value" style="color:#fbbf24;">Pending Review</div>
+            <div class="summary-value" style="color:#4ade80;">✅ Approved</div>
         </div>
     </div>
 
     <hr class="divider">
 
-    <!-- Review Steps -->
+    <!-- Steps — all done -->
     <div class="steps-title">Review Process</div>
 
     <div class="step">
@@ -100,22 +92,22 @@
     </div>
 
     <div class="step">
-        <div class="step-icon active">⏳</div>
+        <div class="step-icon done">✓</div>
         <div class="step-body">
-            <div class="step-name">Verification in Progress</div>
-            <div class="step-desc">Our compliance team is verifying your payment details and confirming voucher authenticity.</div>
+            <div class="step-name">Verification Complete</div>
+            <div class="step-desc">Payment details and voucher authenticity have been fully verified by our compliance team.</div>
         </div>
     </div>
 
     <div class="step">
-        <div class="step-icon pending"></div>
+        <div class="step-icon done">✓</div>
         <div class="step-body">
-            <div class="step-name muted">Approval &amp; Confirmation</div>
-            <div class="step-desc">Once verified, the team will approve the withdrawal and send the funds directly to the recipient's bank account.</div>
+            <div class="step-name">Approved &amp; Ready</div>
+            <div class="step-desc">The withdrawal has been approved. Funds will be sent directly to the recipient's bank account upon completion of the final step.</div>
         </div>
     </div>
 
-
+    <button onclick="window.location.href='main.html'" style="display:block;width:100%;margin-top:24px;padding:15px;background-color:#2563eb;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Continue</button>
 
 </div>
 </body>
