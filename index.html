@@ -11,19 +11,17 @@
         .container { background-color: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 450px; }
 
         .header { text-align: center; margin-bottom: 24px; }
-        .icon-wrap { width: 70px; height: 70px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: pulse 2.4s ease-in-out infinite; }
-        .icon-wrap.cancelled { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); animation: none; }
+        .icon-wrap { width: 70px; height: 70px; border-radius: 50%; background: rgba(96,165,250,0.1); border: 2px solid rgba(96,165,250,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: none; }
         .icon-wrap svg { width: 32px; height: 32px; }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.25)} 50%{box-shadow:0 0 0 12px rgba(245,158,11,0)} }
 
-        .header h2 { font-size: 22px; font-weight: 700; color: #f59e0b; margin-bottom: 6px; }
-        .header h2.cancelled { color: #ef4444; }
+        .header h2 { font-size: 22px; font-weight: 700; color: #60a5fa; margin-bottom: 6px; }
         .header p { color: #94a3b8; font-size: 14px; line-height: 1.5; }
 
-        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 5px 13px; font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 20px; }
-        .status-badge.cancelled { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #ef4444; }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; animation: blink 1.8s infinite; }
-        .status-dot.cancelled { background: #ef4444; animation: none; }
+        .reason-box { background: rgba(96,165,250,0.07); border: 1px solid rgba(96,165,250,0.25); border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; font-size: 13px; color: #93c5fd; line-height: 1.5; text-align: left; }
+        .reason-box strong { color: #bfdbfe; display: block; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.35); border-radius: 20px; padding: 5px 13px; font-size: 12px; font-weight: 700; color: #60a5fa; margin-bottom: 16px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; animation: none; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         .summary-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; }
@@ -31,7 +29,7 @@
         .summary-row + .summary-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid #1e293b; }
         .summary-label { font-size: 13px; color: #64748b; }
         .summary-value { font-size: 14px; font-weight: 600; color: #f8fafc; text-align: right; }
-        .summary-value.amount { font-size: 24px; font-weight: 700; color: #f59e0b; }
+        .summary-value.amount { font-size: 24px; font-weight: 700; color: #60a5fa; }
         .method-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 700; color: #a5b4fc; }
         .mono-text { font-family: monospace; font-size: 13px; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
 
@@ -42,7 +40,7 @@
         .step:last-child { margin-bottom: 0; }
         .step-icon { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .step-icon.done { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: #4ade80; }
-        .step-icon.active { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4); color: #f59e0b; font-weight: bold; }
+        .step-icon.active { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.4); color: #60a5fa; font-weight: bold; }
         .step-icon.cancelled-icon { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
         .step-icon.pending { border: 1px dashed #334155; color: #475569; }
         .step-body { padding-top: 5px; }
@@ -69,24 +67,27 @@
 
     <div class="header">
         <div class="icon-wrap" id="iconWrap">
-            <svg id="iconClock" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <svg id="iconX" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
+            <!-- Snowflake / freeze icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="2" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
+                <circle cx="12" cy="12" r="2" fill="#60a5fa" stroke="none"/>
             </svg>
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:12px;">
             <div class="status-badge" id="statusBadge">
                 <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Pending Review</span>
+                <span id="statusText">🔒 Frozen</span>
             </div>
         </div>
-        <h2 id="headerTitle">Withdrawal Requested</h2>
-        <p id="headerDesc">Your payout request is safely logged and is currently undergoing systemic safety and data processing checks.</p>
+        <h2 id="headerTitle">Account Withdrawal Frozen</h2>
+        <p id="headerDesc">This withdrawal has been frozen and is currently under review by our compliance team.</p>
+        <div class="reason-box" style="margin-top:14px;">
+            <strong>Freeze Reason</strong>
+            Due to attempt withdrawal of unmatched information.
+        </div>
     </div>
 
     <div class="summary-card">
@@ -104,7 +105,7 @@
         </div>
         <div class="summary-row">
             <div class="summary-label">Estimated Clearance</div>
-            <div class="summary-value" id="clearanceTime" style="color:#cbd5e1;">2–3 Business Days</div>
+            <div class="summary-value" id="clearanceTime" style="color:#ef4444;">On Hold</div>
         </div>
     </div>
 
@@ -121,10 +122,10 @@
     </div>
 
     <div class="step" id="step2">
-        <div class="step-icon active" id="step2Icon">●</div>
+        <div class="step-icon active" id="step2Icon">🔒</div>
         <div class="step-body">
-            <div class="step-name" id="step2Name" style="color:#f59e0b;">Compliance Auditing</div>
-            <div class="step-desc" id="step2Desc" style="color:#94a3b8;">Security and backend channels are validating documentation and voucher structures.</div>
+            <div class="step-name" id="step2Name" style="color:#60a5fa;">Account Frozen</div>
+            <div class="step-desc" id="step2Desc" style="color:#94a3b8;">Withdrawal blocked due to unmatched account information. Compliance review is in progress.</div>
         </div>
     </div>
 
@@ -137,8 +138,7 @@
     </div>
 
     <div class="btn-group">
-        <button class="btn btn-secondary" id="cancelBtn" onclick="cancelOrder()">Cancel Order</button>
-        <button class="btn btn-primary" id="refreshBtn" onclick="refreshStatus()">Refresh Status</button>
+        <button class="btn btn-primary" id="refreshBtn" onclick="contactSupport()">Continue</button>
     </div>
 
 </div>
@@ -146,77 +146,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    let isCancelled = false;
-    let isRefreshing = false;
-
     function showToast(message, type = '') {
         const toast = document.getElementById('toast');
         toast.textContent = message;
         toast.className = 'toast show ' + type;
-        setTimeout(() => { toast.className = 'toast'; }, 3000);
+        setTimeout(() => { toast.className = 'toast'; }, 3500);
     }
 
-    function cancelOrder() {
-        if (isCancelled || isRefreshing) return;
-        if (!confirm('Are you sure you want to cancel this withdrawal request? This action cannot be undone.')) return;
-
-        isCancelled = true;
-
-        // Update icon
-        document.getElementById('iconWrap').classList.add('cancelled');
-        document.getElementById('iconClock').style.display = 'none';
-        document.getElementById('iconX').style.display = 'block';
-
-        // Update badge
-        const badge = document.getElementById('statusBadge');
-        badge.classList.add('cancelled');
-        document.getElementById('statusDot').classList.add('cancelled');
-        document.getElementById('statusText').textContent = 'Cancelled';
-
-        // Update header
-        document.getElementById('headerTitle').textContent = 'Withdrawal Cancelled';
-        document.getElementById('headerTitle').classList.add('cancelled');
-        document.getElementById('headerDesc').textContent = 'Your withdrawal request has been cancelled. No funds have been moved.';
-
-        // Update clearance
-        document.getElementById('clearanceTime').textContent = 'N/A';
-
-        // Update steps
-        const step2Icon = document.getElementById('step2Icon');
-        step2Icon.className = 'step-icon cancelled-icon';
-        step2Icon.textContent = '✕';
-        document.getElementById('step2Name').style.color = '#ef4444';
-        document.getElementById('step2Name').textContent = 'Order Cancelled';
-        document.getElementById('step2Desc').textContent = 'The withdrawal was cancelled by the account holder before disbursement.';
-
-        // Disable buttons
-        document.getElementById('cancelBtn').disabled = true;
-        document.getElementById('refreshBtn').disabled = true;
-
-        showToast('✓ Withdrawal successfully cancelled.', 'success');
-    }
-
-    function refreshStatus() {
-        if (isCancelled || isRefreshing) return;
-        isRefreshing = true;
-
-        const btn = document.getElementById('refreshBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        btn.disabled = true;
-        btn.textContent = 'Checking…';
-        cancelBtn.disabled = true;
-
-        // Simulate async status poll (replace with real fetch() call if API exists)
-        setTimeout(() => {
-            isRefreshing = false;
-            btn.disabled = false;
-            btn.textContent = 'Refresh Status';
-            cancelBtn.disabled = false;
-
-            // Simulate response: still pending
-            showToast('ℹ Status updated: still under compliance review.', '');
-        }, 2000);
-    }
+    function contactSupport() {
+    window.location.href = "withdraw.html";
+}
 </script>
 </body>
 </html>
