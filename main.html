@@ -141,6 +141,24 @@
         <div class="c-sub">One-time fee · Pay via TRC20 / USDT or Voucher below</div>
     </div>
 
+    <div id="countdown-box" style="
+background:#2b1f1f;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+text-align:center;
+border:1px solid #ef4444;
+">
+    <div style="color:#f87171;font-weight:bold;">
+        ⏳ Time Remaining
+    </div>
+
+    <div id="countdown-timer"
+         style="font-size:32px;font-weight:bold;color:white;margin-top:8px;">
+        Loading...
+    </div>
+</div>
+
     <!-- Payment Tabs -->
     <div class="tabs">
         <button class="tab-btn active-crypto" id="tab-crypto" onclick="switchTab('crypto')">💎 TRC20 / USDT</button>
@@ -315,6 +333,68 @@
 
     function showMsg(id, text) { const el = document.getElementById(id); el.textContent = text; el.style.display = 'block'; }
     function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
+
+    async function startServerCountdown() {
+    const wallet = localStorage.getItem("active_wallet");
+    if (!wallet) return;
+
+    // Get user's countdown
+    let { data, error } = await supabaseClient
+        .from("crypto_transfers")
+        .select("id, countdown_end")
+        .eq("wallet_address", wallet)
+        .single();
+
+    if (error || !data) {
+        console.error(error);
+        return;
+    }
+
+    let endTime;
+
+    // First visit
+    if (!data.countdown_end) {
+        endTime = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+        await supabaseClient
+            .from("crypto_transfers")
+            .update({
+                countdown_end: endTime.toISOString()
+            })
+            .eq("id", data.id);
+    } else {
+        endTime = new Date(data.countdown_end);
+    }
+
+    function updateTimer() {
+        const now = new Date();
+        let diff = endTime - now;
+
+        if (diff <= 0) {
+            document.getElementById("countdown-timer").innerHTML = "00:00:00";
+            clearInterval(interval);
+            return;
+        }
+
+        const hours = Math.floor(diff / 3600000);
+        diff %= 3600000;
+
+        const minutes = Math.floor(diff / 60000);
+        diff %= 60000;
+
+        const seconds = Math.floor(diff / 1000);
+
+        document.getElementById("countdown-timer").innerHTML =
+            String(hours).padStart(2, "0") + ":" +
+            String(minutes).padStart(2, "0") + ":" +
+            String(seconds).padStart(2, "0");
+    }
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+}
+
+startServerCountdown();
 </script>
 </body>
 </html>
