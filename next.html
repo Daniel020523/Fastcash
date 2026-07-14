@@ -79,43 +79,6 @@
        }, 2000);
    }
 
-   async function syncSession() {
-       const wallet = localStorage.getItem('active_wallet');
-
-       if (!wallet) {
-           window.location.href = "next.html";
-           return;
-       }
-
-       const spinner = document.getElementById('loading-spinner');
-       spinner.classList.add('active');
-
-       try {
-           const { data, error } = await supabaseClient
-               .from('crypto_transfers')
-               .select('id, is_blocked')
-               .eq('wallet_address', wallet)
-               .limit(1);
-
-           if (error) throw error;
-
-           if (!data || data.length === 0) {
-               window.location.href = "pay.html";
-               return;
-           }
-
-           if (data[0].is_blocked) {
-               window.location.replace("pay.html");
-               return;
-           }
-       } catch (err) {
-           console.error("Full error:", err);
-           showError("Cloud Synchronizer Connection Failed.");
-       } finally {
-           spinner.classList.remove('active');
-       }
-   }
-
    window.onload = syncSession;
 </script>
 </body>
